@@ -1,0 +1,8 @@
+var1 = tuple((1,))
+var2 = tuple((1, 2, 3))
+var3 = (1,)
+var4 = (1, 2, 3)
+print(var1)
+print(var2)
+print(var3)
+print(var4)

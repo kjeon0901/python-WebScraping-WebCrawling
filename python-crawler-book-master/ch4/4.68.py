@@ -1,0 +1,7 @@
+var1 = (1, 2, 3, 4, 5)
+var2 = (11, 22, 33, 44, 55)
+print(var1)
+print(var2)
+print(var1 + var2)
+print(var1 * 3)
+print(var2 * 3)
