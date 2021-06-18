@@ -22,3 +22,104 @@ print(res.status_code)
 => 웹크롤링 하는 도중 문제 해결이 필요하다면 웹에 대한 이런 기본 지식이 필요하다. 
 '''
 
+============================================================
+
+import requests as rq
+
+url1 = "https://aldkfja.com/a" # https://aldkfja.com 라는 서버에서 a라는 웹페이지
+res1 = rq.get(url1)
+print(res1)
+print(res1.status_code)
+'''error'''
+
+url2 = "https://github.com/kjeon0901/a" # https://github.com 라는 서버에서 kjeon0901 웹페이지 안의 a라는 웹페이지
+res2 = rq.get(url2)
+print(res2)
+print(res2.status_code)
+'''
+<Response [404]>
+404
+
+서버 : https://github.com/
+페이지 : https://github.com/kjeon0901 , https://github.com/kjeon0901/python-spider-machinelearning
+
+url1. 서버 주소 자체를 잘못 입력한 경우 => '사이트에 연결할 수 없음', 코드 상으로는 아예 에러 남. 
+url2. 서버에 들어갔는데 페이지가 없는 경우 => 404 뜸. 
+
+프로그램이 돌다가 찾는 페이지 없어서 넘어가면 괜찮지만, 아예 에러가 나서 멈춰 있으면 안되니까 try-catch문 多 써줌! 
+'''
+
+============================================================
+
+import requests as rq
+
+
+def url_check(url):
+    res = rq.get(url)
+
+    print(res)
+
+    sc = res.status_code
+
+    if sc == 200:
+        print("%s 요청성공"%(url))
+    elif sc == 404:
+        print("%s 찾을 수 없음" %(url))
+    else:
+        print("%s 알수 없는 에러 : %s"%(url, sc))
+
+
+url_check("https://github.com/kjeon0901/")
+url_check("https://github.com/kjeon0901//a")
+'''
+<Response [200]>
+https://github.com/kjeon0901/ 요청성공
+<Response [404]>
+https://github.com/kjeon0901//a 찾을 수 없음
+'''
+
+============================================================
+
+import requests as rq
+
+url = "https://blog.naver.com/kjeon0901"
+
+res = rq.get(url)
+
+print(res)
+print(res.headers) # 딕셔너리 타입 
+print(len(res.headers))
+'''
+<Response [200]>
+{'Date': 'Fri, 18 Jun 2021 01:06:04 GMT', 'Content-Type': 'text/html;charset=UTF-8', 'Transfer-Encoding': 'chunked', 
+ 'Connection': 'close', 'Vary': 'Accept-Encoding', 'Cache-Control': 'no-cache', 'Expires': 'Thu, 01 Jan 1970 00:00:00 GMT', 
+ 'Set-Cookie': 'JSESSIONID=7A8C9A4666E68B5D11A123D946BF986B.jvm1; Path=/; Secure; HttpOnly', 'Content-Encoding': 'gzip', 
+ 'Server': 'nxfps', 'Referrer-policy': 'unsafe-url'}
+11
+'''
+
+============================================================
+
+import requests as rq
+
+url = "https://blog.naver.com/kjeon0901"
+
+res = rq.get(url)
+
+print(res)
+
+headers = res.headers
+print(headers['Set-Cookie']) # 딕셔너리 타입에 접근할 때에는 key값 이용 !
+'''
+Cookie
+- ex) 내가 어떤 브라우저에서 로그인 한 뒤, 브라우저 껐다가 다시 켰는데 그대로 로그인 되어 있는 경우 '쿠키' 때문!
+- '내가 이 브라우저에 접속했다' 는 게 작은 txt파일로 서버가 아니라 내 컴퓨터의 브라우저에 저장되는 것. 
+  그러면 내가 브라우저에 다시 접속하면, 브라우저가 그 txt파일을 서버에 보내줘서 로그인 바로바로 되게 해줌. 
+- 그런데 보안이 문제! 내 브라우저를 해킹하면 문제! => 조심스럽다. 
+'''
+
+============================================================
+
+
+
+
