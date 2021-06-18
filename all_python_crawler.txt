@@ -210,5 +210,399 @@ print(cookies)
 '''
 
 ■■■■■■■■■■■■■0619 수업中 새로 알게된것■■■■■■■■■■■■■
+
+ln [1] : 
+
+from urllib.request import urlopen
+
+html = urlopen('http://pythonscraping.com/pages/page1.html')
+print(html.read())
+
+
+ln [2] : 
+
+from urllib.request import urlopen
+from bs4 import BeautifulSoup # 파싱(구문분석. 내가 원하는 정보만 취함)을 원활하게 해줌. 
+
+html = urlopen('http://www.pythonscraping.com/pages/page1.html')
+bs = BeautifulSoup(html.read(), 'html.parser') # html.read(), 즉 이 url의 html코드에서 파싱할 수 있게 해주는 객체. 
+print(bs.h1) # 이 url의 코드에서 h1 태그만 출력. 
+'''<h1>An Interesting Title</h1>'''
+
+
+ln [3] : 
+
+from urllib.request import urlopen
+from urllib.error import HTTPError
+from urllib.error import URLError
+
+try:
+    html = urlopen("https://pythonscrapingthisurldoesnotexist.com") # 정상적이지 않은 url이기 때문에 
+except HTTPError as e: # 서버까지는 똑바로 접근했지만, 페이지가 없는 경우
+    print("The server returned an HTTP error")
+except URLError as e: # 서버 자체가 잘못된 경우 (현재 이 상황!)
+    print("The server could not be found!")
+else: # 위의 두 가지 에러 모두 발생하지 않은 경우
+    print(html.read())
+'''The server could not be found!'''
+
+
+ln [4] : 
+
+from urllib.request import urlopen
+from urllib.error import HTTPError
+from bs4 import BeautifulSoup
+
+
+def getTitle(url): # 해당 url에서 title을 가져오는 함수
+    try: 
+        html = urlopen(url) # url 열어서 해당 페이지 html 가져옴
+    except HTTPError as e: # 서버까지는 똑바로 접근했지만, 페이지가 없는 HTTPError 발생하면!
+        print(e)
+        return None
+    try:
+        bsObj = BeautifulSoup(html.read(), "lxml") # 이 html 소스 코드를 파싱하기 쉽게 하는 BeautifulSoup 객체 만듦.
+        '''
+        BeautifulSoup(html,'html.parser') 로 해도 됨. 
+        lxml 모듈은 선택사항이다. bs4 모듈에 html parser는 내장되어있지만, lxml 의 속도가 더 빠르다. 
+        '''
+        title = bsObj.body.h1 # BeautifulSoup 객체가 html에서 body 태그 안의 h1 태그를 받아옴. 
+        '''
+        title1 = bsObj.body.h2 # 에러X. h2태그는 없음. 그냥 title1에는 None 들어가고 잘 실행됨. 
+        title2 = title1.h1     # 에러O. title1=None이 들어가 있으므로 AttributeError 발생!
+                                        => 이 코드는 수행 안 되고 except문으로 빠짐. 
+                                        'NoneType' object has no attribute 'h1'
+                                        Title could not be found
+                               # 보통 이런 식으로 태그 안의 또 다른 태그에 접근하기 때문에 AttributeError 엄청 多多多!!
+        '''
+    except AttributeError as e: # 속성 오류 : 속성 이름 잘못됐거나, 없는 속성 가져오려 할 때 발생. 
+        print(e)
+        return None
+    return title # except문(None 리턴하고 함수 종료되었음)으로 한 번도 빠지지 않은 경우, 여기서 title 리턴하게 됨. 
+
+
+title = getTitle("http://www.pythonscraping.com/pages/page1.html") 
+if title == None:
+    print("Title could not be found")
+else:
+    print(title) # 이 코드에서는 다 잘 작동해서 제대로 print. 
+    '''<h1>An Interesting Title</h1>'''
+
+=============================================================
+
+ln [] : 
+
+from urllib.request import urlopen
+from bs4 import BeautifulSoup
+html = urlopen('http://www.pythonscraping.com/pages/warandpeace.html')
+bs = BeautifulSoup(html, 'html.parser')
+print(bs)
+
+
+ln [1] : 
+
+from urllib.request import urlopen
+from bs4 import BeautifulSoup
+html = urlopen('http://www.pythonscraping.com/pages/warandpeace.html')
+bs = BeautifulSoup(html, "html.parser")
+
+
+ln [2] : 
+
+nameList = bs.findAll('span', {'class': 'green'}) # span 태그 中 class="green"(사람 이름 전부 이 속성 지정돼있음) 전부 찾아서
+for name in nameList:
+    print(name.get_text()) # 각각 text만 출력
+'''
+Anna
+Pavlovna Scherer
+Empress Marya
+Fedorovna
+Prince Vasili Kuragin
+Anna Pavlovna
+St. Petersburg
+the prince
+Anna Pavlovna
+Anna Pavlovna
+the prince
+the prince
+the prince
+Prince Vasili
+Anna Pavlovna
+Anna Pavlovna
+the prince
+Wintzingerode
+King of Prussia
+le Vicomte de Mortemart
+Montmorencys
+Rohans
+Abbe Morio
+the Emperor
+the prince
+Prince Vasili
+Dowager Empress Marya Fedorovna
+the baron
+Anna Pavlovna
+the Empress
+the Empress
+Anna Pavlovna's
+Her Majesty
+Baron
+Funke
+The prince
+Anna
+Pavlovna
+the Empress
+The prince
+Anatole
+the prince
+The prince
+Anna
+Pavlovna
+Anna Pavlovna
+'''
+
+
+ln [3] : 
+
+titles = bs.find_all(['h1', 'h2','h3','h4','h5','h6']) # 리스트에 담긴 태그들 전부 찾아서 담음. 
+print([title for title in titles]) # 찾아진 태그들 리스트에 담아서 출력
+
+
+ln [4] : 
+
+allText = bs.find_all('span', {'class':{'green', 'red'}}) # class="green" 또는 class="red"를 속성으로 갖는 모든 span 태그 찾아서 담음. 
+print([text for text in allText]) # 찾아진 태그들 리스트에 담아서 출력
+
+
+ln [5] : 
+
+nameList = bs.find_all(text='the prince') # 이번에는 태그 속성이 아니라, 실질적으로 'the prince'라는 text에 집중해서 
+                                          # 이 구문이 나올 때마다 리스트에 'the prince' 담아줌. 
+print(nameList)
+print(len(nameList))
+
+
+ln [6] : 
+
+title = bs.find_all(id='title', class_='text') # 이런 태그는 없어서 아무것도 안 담김. 
+print([text for text in title])
+'''
+class_ : class 속성 검색하려면 class 말고 class_로 검색해야 함. 
+'''
+
+
+ln [7] : 
+
+from urllib.request import urlopen
+from bs4 import BeautifulSoup
+
+html = urlopen('http://www.pythonscraping.com/pages/page3.html')
+bs = BeautifulSoup(html, 'html.parser')
+
+for child in bs.find('table',{'id':'giftList'}).children: # find : 조건을 만족시키는 가장 첫 번째 아이만 찾아서 리턴. 
+                                                          # 참고로, <tbody></tbody>는 태그가 아님
+    print(child)
+    
+'''
+sibling : 형제
+children : 자식(2대까지만)
+descendent : 자손(2대, 3대, 4대, ...)
+------------------------------------------
+
+
+<tr><th>
+Item Title
+</th><th>
+Description
+</th><th>
+Cost
+</th><th>
+Image
+</th></tr>
+
+
+<tr class="gift" id="gift1"><td>
+Vegetable Basket
+</td><td>
+This vegetable basket is the perfect gift for your health conscious (or overweight) friends!
+<span class="excitingNote">Now with super-colorful bell peppers!</span>
+</td><td>
+$15.00
+</td><td>
+<img src="../img/gifts/img1.jpg"/>
+</td></tr>
+
+
+<tr class="gift" id="gift2"><td>
+Russian Nesting Dolls
+</td><td>
+Hand-painted by trained monkeys, these exquisite dolls are priceless! And by "priceless," we mean "extremely expensive"! <span class="excitingNote">8 entire dolls per set! Octuple the presents!</span>
+</td><td>
+$10,000.52
+</td><td>
+<img src="../img/gifts/img2.jpg"/>
+</td></tr>
+
+
+<tr class="gift" id="gift3"><td>
+Fish Painting
+</td><td>
+If something seems fishy about this painting, it's because it's a fish! <span class="excitingNote">Also hand-painted by trained monkeys!</span>
+</td><td>
+$10,005.00
+</td><td>
+<img src="../img/gifts/img3.jpg"/>
+</td></tr>
+
+
+<tr class="gift" id="gift4"><td>
+Dead Parrot
+</td><td>
+This is an ex-parrot! <span class="excitingNote">Or maybe he's only resting?</span>
+</td><td>
+$0.50
+</td><td>
+<img src="../img/gifts/img4.jpg"/>
+</td></tr>
+
+
+<tr class="gift" id="gift5"><td>
+Mystery Box
+</td><td>
+If you love suprises, this mystery box is for you! Do not place on light-colored surfaces. May cause oil staining. <span class="excitingNote">Keep your friends guessing!</span>
+</td><td>
+$1.50
+</td><td>
+<img src="../img/gifts/img6.jpg"/>
+</td></tr>
+
+'''
+
+
+ln [8] : 
+
+from urllib.request import urlopen
+from bs4 import BeautifulSoup
+
+html = urlopen('http://www.pythonscraping.com/pages/page3.html')
+bs = BeautifulSoup(html, 'html.parser')
+
+for sibling in bs.find('table', {'id':'giftList'}).tr.next_siblings: # find니까 맨 첫 번째 tr. 그 아이 다음에 있는 형제자매들 전부 담음. 
+    print(sibling) 
+'''
+<tr class="gift" id="gift1"><td>
+Vegetable Basket
+</td><td>
+This vegetable basket is the perfect gift for your health conscious (or overweight) friends!
+<span class="excitingNote">Now with super-colorful bell peppers!</span>
+</td><td>
+$15.00
+</td><td>
+<img src="../img/gifts/img1.jpg"/>
+</td></tr>
+
+
+<tr class="gift" id="gift2"><td>
+Russian Nesting Dolls
+</td><td>
+Hand-painted by trained monkeys, these exquisite dolls are priceless! And by "priceless," we mean "extremely expensive"! <span class="excitingNote">8 entire dolls per set! Octuple the presents!</span>
+</td><td>
+$10,000.52
+</td><td>
+<img src="../img/gifts/img2.jpg"/>
+</td></tr>
+
+
+<tr class="gift" id="gift3"><td>
+Fish Painting
+</td><td>
+If something seems fishy about this painting, it's because it's a fish! <span class="excitingNote">Also hand-painted by trained monkeys!</span>
+</td><td>
+$10,005.00
+</td><td>
+<img src="../img/gifts/img3.jpg"/>
+</td></tr>
+
+
+<tr class="gift" id="gift4"><td>
+Dead Parrot
+</td><td>
+This is an ex-parrot! <span class="excitingNote">Or maybe he's only resting?</span>
+</td><td>
+$0.50
+</td><td>
+<img src="../img/gifts/img4.jpg"/>
+</td></tr>
+
+
+<tr class="gift" id="gift5"><td>
+Mystery Box
+</td><td>
+If you love suprises, this mystery box is for you! Do not place on light-colored surfaces. May cause oil staining. <span class="excitingNote">Keep your friends guessing!</span>
+</td><td>
+$1.50
+</td><td>
+<img src="../img/gifts/img6.jpg"/>
+</td></tr>
+
+'''
+
+
+ln [9] : 
+
+from urllib.request import urlopen
+from bs4 import BeautifulSoup
+
+html = urlopen('http://www.pythonscraping.com/pages/page3.html')
+bs = BeautifulSoup(html, 'html.parser')
+print(bs.find('img',
+              {'src':'../img/gifts/img1.jpg'}) # 이 src 경로를 속성으로 갖는 img태그를 찾아서
+      .parent.previous_sibling.get_text()) # 그 태그의 부모태그 td를 찾고, td의 바로 앞 sibling인 또다른 td를 찾고, 걔의 text만 뽑아 print. 
+'''$15.00'''
+
+
+ln [10] : 
+
+from urllib.request import urlopen
+from bs4 import BeautifulSoup
+import re
+
+html = urlopen('http://www.pythonscraping.com/pages/page3.html')
+bs = BeautifulSoup(html, 'html.parser')
+images = bs.find_all('img', {'src':re.compile('\.\.\/img\/gifts/img.*\.jpg')}) # re.compile(): 정규식 문자열. 
+'''
+지금 img 파일 src를 전부 보면 규칙성을 찾을 수 있다. img 뒤의 숫자값이 증가하면서 다음 img로 넘어간다. 
+        => 정규식을 만족하는 아이들 전부 긁어오는 식으로 하면 되겠군!
+'\.\.\/img\/gifts/img.*\.jpg'
+        => . → 문자(글자,숫자,기호,공백 등) 하나 나타남 
+        => * → 바로 앞의 문자 or 표현식이 0번 이상 나타남 (없을수도 o)
+'''
+for image in images: 
+    print(image['src'])
+'''
+../img/gifts/img1.jpg
+../img/gifts/img2.jpg
+../img/gifts/img3.jpg
+../img/gifts/img4.jpg
+../img/gifts/img6.jpg
+'''
+
+
+ln [11] : 
+
+bs.find_all(lambda tag: len(tag.attrs) == 2)
+
+
+ln [12] : 
+
+bs.find_all(lambda tag: tag.get_text() == 'Or maybe he\'s only resting?')
+
+
+ln [13] : 
+
+bs.find_all('', text='Or maybe he\'s only resting?')
+
+
+
 ■■■■■■■■■■■■■0620 수업中 새로 알게된것■■■■■■■■■■■■■
 ■■■■■■■■■■■■■0621 수업中 새로 알게된것■■■■■■■■■■■■■
