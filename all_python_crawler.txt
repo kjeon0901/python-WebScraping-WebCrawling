@@ -1,8 +1,34 @@
+■■■■■■■■■■■■■0617 수업中 새로 알게된것■■■■■■■■■■■■■
+
+     <!-- 
+     id:하나의 id는 하나만 가리킴. class:여러 개 소속될수 있음.
+     id는 #id{ }, class는 .class{ } 
+     
+     p.p-target : p라는 태그에서 p-target속성은 이렇게 디자인 해주세요~ 
+     li.li-target : li라는 태그에서 li-target속성은 이렇게 디자인 해주세요~ 
+     list-style-type: none; : 리스트 표시하는 앞의 표기 없애주세요~
+     -->
+    <!-- 
+    한 칸 띄우면 '자식' !!
+    
+    div#container p : div라는 태그 중 id가 container인 애들의 '자식' 중에서 p태그 
+    div#container div#wrap1 h3 : div라는 태그 중 id가 container인 애들의 '자식' 중에서 div태그 중 id가 wrap1인 애들의 '자식' 중에서 h3태그. 
+    -->
+
 ■■■■■■■■■■■■■0618 수업中 새로 알게된것■■■■■■■■■■■■■
 
 import requests as rq
 
-url = "https://pjt3591oo.github.io"
+url = "https://github.com/kjeon0901"
+
+test = rq.get(url) # rq가 url에 get메시지를 보냄. 
+                   # chrome, explorer 등 웹 브라우저를 거치지 않고 url이라는 서버에 접근해서 url웹페이지에 대한 코드를 가져옴. 
+'''
+파이썬에서는 그냥 rq가 url에 get메시지를 보낸 것 하나지만, 
+서버에서는 해당 url에 대한 코드 html, css, javascript 등등을 보내주고, 그걸 실행함으로써 알아서 웹페이지가 열렸다. 
+
+이제는 받아온 데이터 test에서 원하는 정보를 추출할 것임 !!
+'''
 
 res = rq.get(url)
 print(res)
@@ -22,7 +48,63 @@ print(res.status_code)
 => 웹크롤링 하는 도중 문제 해결이 필요하다면 웹에 대한 이런 기본 지식이 필요하다. 
 '''
 
-============================================================
+print(res.encoding) # utf-8형식으로 인코딩돼있구나~ 그럼 똑같이 utf-8로 디코딩해야겠구나~
+'''utf-8'''
+
+print(res.text) # 리턴받은 html 코드를 console창에 띄워줌. 
+'''
+......
+ 1.75h8.5A1.75 1.75 0 0014 13.25v-9.5a1.75 1.75 0 00-.874-1.515.75.75 0 10-.752 1.298.25.25 0 01.126.217v9.5a.25.25 0 01-.25.25h-8.5a.25.25 0 01-.25-.25v-9.5a.25.25 0 01.126-.217z"></path>
+</svg>
+      <svg aria-hidden="true" viewBox="0 0 16 16" version="1.1" data-view-component="true" height="16" width="16" class="octicon octicon-check js-clipboard-check-icon color-text-success d-none m-2">
+    <path fill-rule="evenodd" d="M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z"></path>
+</svg>
+    </clipboard-copy>
+  </div>
+</template>
+
+
+  </body>
+</html>
+'''
+
+cookies = list(res.cookies)
+headers_cookies = res.headers['Set-Cookie']
+
+print('cookies 속성')
+print(cookies)
+print('')
+print('headers 속성')
+print(headers_cookies)
+
+
+
+res1 = rq.get(url, params={"key1": "value1", "key2": "value2"}) # query string 
+
+print(res1.url)
+'''
+https://github.com/kjeon0901/?key1=value1&key2=value2
+
+일반적으로 get 명령어에서는 파라미터 설정값을 url주소에다가 한꺼번에 붙여서 넘겨주는 방식 多 사용. 
+- 딕셔너리 형태. 
+
+어떤 설정값을 주느냐에 따라 웹페이지 정보가 바뀜. 
+
+네이버 로그인
+https://nid.naver.com/nidlogin.login?mode=form&url=https%3A%2F%2Fwww.naver.com
+mode    form
+url     https%3A%2F%2Fwww.naver.com
+
+네이버 일회용 번호 로그인
+https://nid.naver.com/nidlogin.login?mode=number&url=https%3A%2F%2Fwww.naver.com&locale=ko_KR&svctype=1
+mode    number
+url     https%3A%2F%2Fwww.naver.com
+locale  ko_KR
+svctype 1
+
+'''
+
+=============================================================
 
 import requests as rq
 
@@ -49,11 +131,6 @@ url2. 서버에 들어갔는데 페이지가 없는 경우 => 404 뜸.
 프로그램이 돌다가 찾는 페이지 없어서 넘어가면 괜찮지만, 아예 에러가 나서 멈춰 있으면 안되니까 try-catch문 多 써줌! 
 '''
 
-============================================================
-
-import requests as rq
-
-
 def url_check(url):
     res = rq.get(url)
 
@@ -78,7 +155,7 @@ https://github.com/kjeon0901/ 요청성공
 https://github.com/kjeon0901//a 찾을 수 없음
 '''
 
-============================================================
+=============================================================
 
 import requests as rq
 
@@ -98,16 +175,6 @@ print(len(res.headers))
 11
 '''
 
-============================================================
-
-import requests as rq
-
-url = "https://blog.naver.com/kjeon0901"
-
-res = rq.get(url)
-
-print(res)
-
 headers = res.headers
 print(headers['Set-Cookie']) # 딕셔너리 타입에 접근할 때에는 key값 이용 !
 '''
@@ -118,8 +185,30 @@ Cookie
 - 그런데 보안이 문제! 내 브라우저를 해킹하면 문제! => 조심스럽다. 
 '''
 
-============================================================
+for header in headers:
+    print(headers[header])
+'''
+<Response [200]>
+Fri, 18 Jun 2021 01:16:38 GMT
+text/html;charset=UTF-8
+chunked
+close
+Accept-Encoding
+no-cache
+Thu, 01 Jan 1970 00:00:00 GMT
+JSESSIONID=C62E32687DD25DC10E313A7B5DD396E0.jvm1; Path=/; Secure; HttpOnly
+gzip
+nxfps
+unsafe-url
+'''
 
+cookies = res.cookies
+print(cookies)
+'''
+<RequestsCookieJar[<Cookie JSESSIONID=EB17C42065676C826ED5710E0E18AE21.jvm1 for blog.naver.com/>]>
+내가 접속한 블로그에 대한 쿠키 파일이 남았다. 
+'''
 
-
-
+■■■■■■■■■■■■■0619 수업中 새로 알게된것■■■■■■■■■■■■■
+■■■■■■■■■■■■■0620 수업中 새로 알게된것■■■■■■■■■■■■■
+■■■■■■■■■■■■■0621 수업中 새로 알게된것■■■■■■■■■■■■■

@@ -1,6 +1,6 @@
 import requests as rq
 
-url = "http://blog.naver.com/pjt3591oo"
+url = "https://github.com/kjeon0901"
 
 res = rq.get(url)
 
