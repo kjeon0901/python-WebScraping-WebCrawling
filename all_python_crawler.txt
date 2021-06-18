@@ -406,7 +406,7 @@ for child in bs.find('table',{'id':'giftList'}).children: # find : 조건을 만
 '''
 sibling : 형제
 children : 자식(2대까지만)
-descendent : 자손(2대, 3대, 4대, ...)
+descendant : 자손(2대, 3대, 4대, ...)
 ------------------------------------------
 
 
