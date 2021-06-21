@@ -5,6 +5,7 @@
 	2. '공연전시'를 누르고 나오는 화면은 내가 긁어온 html로 나오는 게 아니라, js 기능적으로 사이트 자체에서 태그 누르면 추가되도록 되어 있기 때문에, 내가 긁어온 html로는 알 수 없음. → Selenium 이용 필요
 	3. 내가 찾고 싶은 class가 다른 곳에서도 쓰일 수 있다. → parent로 넘어감. 상위 태그에서 유일한 class를 가진 태그를 찾으면, 걔부터 접근
 	※ 또 다른 방법이 있을 수 있음. 노하우 쌓이면 그렇게 하기. 
+https://regexr.com/ 정규표현식과 문자열 match하는지 확인하는 사이트
 
 ■■■■■■■■■■■■■0617 수업中 새로 알게된것■■■■■■■■■■■■■
 
@@ -577,7 +578,7 @@ import re
 
 html = urlopen('http://www.pythonscraping.com/pages/page3.html')
 bs = BeautifulSoup(html, 'html.parser')
-images = bs.find_all('img', {'src':re.compile('\.\.\/img\/gifts/img.*\.jpg')}) # re.compile(): 정규식 문자열. 
+images = bs.find_all('img', {'src':re.compile('\.\.\/img\/gifts/img.*\.jpg')}) # re.compile(): 정규표현식 
 '''
 지금 img 파일 src를 전부 보면 규칙성을 찾을 수 있다. img 뒤의 숫자값이 증가하면서 다음 img로 넘어간다. 
         => 정규식을 만족하는 아이들 전부 긁어오는 식으로 하면 되겠군!
@@ -615,13 +616,132 @@ bs.find_all('', text='Or maybe he\'s only resting?')
 
 ■■■■■■■■■■■■■0621 수업中 새로 알게된것■■■■■■■■■■■■■
 
+정규표현식
 
 
+====================================================
+
+ln [1] : 
+
+## 케빈 베이컨의 6단계 법칙 : 인간관계는 6단계만 거치면 지구상 대부분의 사람과 연결될 수 있다는 사회 이론
+
+from urllib.request import urlopen
+from bs4 import BeautifulSoup 
+
+html = urlopen('http://en.wikipedia.org/wiki/Kevin_Bacon')
+bs = BeautifulSoup(html, 'html.parser')
+for link in bs.find_all('a'):
+    if 'href' in link.attrs: # link.attrs : link라는 태그(a 태그 中 하나)가 가진 속성들
+        print(link.attrs['href']) # href 속성의 value값 출력 
+'''
+/wiki/Wikipedia:Protection_policy#semi
+#mw-head
+#searchInput
+/wiki/Kevin_Bacon_(disambiguation)
+/wiki/File:Kevin_Bacon_SDCC_2014.jpg
+/wiki/Philadelphia,_Pennsylvania
+/wiki/Kyra_Sedgwick
+/wiki/Sosie_Bacon
+#cite_note-1
+/wiki/Edmund_Bacon_(architect)
+/wiki/Michael_Bacon_(musician)
+/wiki/Holly_Near
+http://baconbros.com/
+  ㆍㆍㆍ
+엄청 많음!
+'''
 
 
+ln [2] : 
+
+## Retrieving Articles Only
+
+from urllib.request import urlopen 
+from bs4 import BeautifulSoup 
+import re
+
+html = urlopen('http://en.wikipedia.org/wiki/Kevin_Bacon')
+bs = BeautifulSoup(html, 'html.parser')
+for link in bs.find('div', {'id':'bodyContent'}).find_all(  # link : 아래 find_all 만족시키는 a태그들 中 하나
+    'a', href=re.compile('^(/wiki/)((?!:).)*$')):           # a태그의 속성에 대한 정규표현식
+    '''
+    '^(/wiki/)((?!:).)*$'
+        => ^  → 바로 뒤의 문자 or 표현식으로 문자열 시작해야 함. ^( ) 괄호로 묶으면 문자열도 가능
+        => $  → 바로 앞의 문자 or 표현식으로 문자열 끝내야 함. 안 써주면 뒤에 더 와도 되므로, 피하고 싶은 애들을 완벽히 제외하려면 써줌. 
+        => ?! → 바로 뒤의 문자 or 표현식은 오면 안 됨
+        => ?= → 바로 뒤의 문자 or 표현식은 와야 됨
+        ▶ 문자열은 /wiki/로 시작하고, :가 포함되지 않는 아무 문자열 오고 나면 끝난다. 
+        ▶ $ 안써주면 뒤에 :, 개행 등 더 와도 앞부분만 match되면 ㄱㅊ. :를 완벽히 제외하지 못하게 됨. 
+    '''
+    if 'href' in link.attrs:     # for문에서 걸러낸 link의 속성 中 href가 있다면
+        print(link.attrs['href']) # 그 href 속성의 value값 출력
+'''
+/wiki/Kevin_Bacon_(disambiguation)
+/wiki/San_Diego_Comic-Con
+/wiki/Philadelphia
+/wiki/Pennsylvania
+/wiki/Kyra_Sedgwick
+/wiki/Sosie_Bacon
+/wiki/Edmund_Bacon_(architect)
+/wiki/Michael_Bacon_(musician)
+/wiki/Footloose_(1984_film)
+/wiki/JFK_(film)
+/wiki/A_Few_Good_Men
+/wiki/Apollo_13_(film)
+  ㆍㆍㆍ
+엄청 많음! 그래도 이제 '^(/wiki/)((?!:).)*$' 에 해당되는 속성값만 출력됨. 
+계속 다른 영화, 다른 배우에 관한 위키백과로만 타고 타고 .. 들어가기 위해서 이렇게 걸러준 것임. 
+'''
 
 
+ln [*] : 
 
+## Random Walk
+
+from urllib.request import urlopen
+from bs4 import BeautifulSoup
+import datetime
+import random
+import re
+
+random.seed(datetime.datetime.now()) # 시드값(랜덤수행방법)
+def getLinks(articleUrl):
+    html = urlopen('http://en.wikipedia.org{}'.format(articleUrl)) 
+                # http://en.wikipedia.org : 서버주소
+                # {} 안에 articleUrl 넣어줌 => http://en.wikipedia.org/wiki/Kevin_Bacon : 페이지주소
+    bs = BeautifulSoup(html, 'html.parser')
+    return bs.find('div', {'id':'bodyContent'}).find_all('a', href=re.compile('^(/wiki/)((?!:).)*$'))
+
+links = getLinks('/wiki/Kevin_Bacon') # href=re.compile('^(/wiki/)((?!:).)*$') 만족하는 a태그들만 담김
+while len(links) > 0: # 무한루프
+    newArticle = links[random.randint(0, len(links)-1)].attrs['href'] # href값(링크) 전체를 랜덤으로 담음
+    '''
+    np.random.randint(시드값, 개수) - 균일 분포의 정수 랜덤값 생성
+    np.random.rand(시드값, 개수)    - 0~1 균일 분포의 랜덤값 생성
+    np.random.randn(시드값, 개수)   - 가우시안 표준 정규 분포의 랜덤값 생성
+    '''
+    print(newArticle)
+    links = getLinks(newArticle) # 현재 a태그 속성 href값(링크) 안의 또다른 a태그를 가져옴. 
+'''
+/wiki/Phoenix_Film_Festival
+/wiki/Mad_Hot_Ballroom
+/wiki/Fiorello_H._LaGuardia_High_School
+/wiki/The_Beacon_School
+/wiki/Innovation_Diploma_Plus_High_School
+/wiki/Little_Red_School_House
+/wiki/New_York_School_of_Applied_Design_for_Women
+/wiki/Rice_High_School_(New_York)
+/wiki/High_School_of_Fashion_Industries
+/wiki/Hewitt_School
+  ㆍㆍㆍ
+이제는 실제로 링크 안의 링크로, 또 그 안의 링크로 .. 타고 타고 들어가는 Crawler 만들어짐. 
+이런 코드 안에 어떤 동작을 하도록 기능을 넣어주면 Crawler가 동작하게 됨. 
+'''
+
+
+ln [4] : 
+
+## Recursively crawling an entire site
 
 
 
