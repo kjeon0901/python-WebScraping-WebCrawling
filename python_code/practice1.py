@@ -22,14 +22,19 @@ def getLinks(pageUrl):
     contents = []
     try: # 목차 리스트 담기
         contents.append(bs.h1.get_text())
-        print(1)
-        print(bs.find('li', class_=re.compile('^(toclevel-1).*')).find('span', class_="toctext").get_text())
+        print(bs.find('div', {'class':"toctitle"}).next_siblings)
+        #for child in bs.find('div', class_="toctitle").next_siblings.li.a.get_text():
+        #    print(child)
+        #    contents.append(bs.find('a').get_text())
     except AttributeError:
         print('This page is missing something! Continuing.')
+    print(contents)
     total_contents.append(contents)
     
     for link in bs.find('div', {'id':'bodyContent'}).find_all('a', href=re.compile('^(/wiki/)((?!:).)*$')):
         if 'href' in link.attrs:
+            if '(disambiguation)' in link.attrs['href']:
+                continue
             if link.attrs['href'] not in pages:
                 #We have encountered a new page
                 newPage = link.attrs['href']
