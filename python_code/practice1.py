@@ -2,7 +2,7 @@ from urllib.request import urlopen
 from bs4 import BeautifulSoup
 import re
 
-######### 재귀횟수 9번 (처음 실행까지 10번) => 웹페이지 10개 크롤링할 것임. 
+######### 문제 2. 재귀횟수 9번 (처음 실행까지 10번) => 웹페이지 10개 크롤링할 것임. 
 ######### kevin bacon 위키백과 Contents 목차 1순위들만을 crawling해서 목차에 대한 데이터를 리스트로 담기
 ######### [페이지제목(Kevin Bacon), Contents 1., Contents 2., Contents 3.] 이거 10개를 또 큰 리스트에 담기
 

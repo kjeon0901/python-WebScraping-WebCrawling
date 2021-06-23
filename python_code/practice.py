@@ -2,7 +2,7 @@ from urllib.request import urlopen
 from bs4 import BeautifulSoup
 import re
 
-######### 재귀횟수 10번 (처음 실행까지 11번) 되면 프로그램 종료가 되는 코드 추가하라. 
+######### 문제 1. 재귀횟수 10번 (처음 실행까지 11번) 되면 프로그램 종료가 되는 코드 추가하라. 
 '''
     # 재귀함수가 for문 안에 있기 때문에, 계속 for문의 첫 번째 loop만 만난다. 
     # 그러다가 a태그가 없어서 for문으로 들어오지 않고 이 getLinks함수가 종료되면, 
