@@ -1026,6 +1026,27 @@ getLinks('/wiki/Kevin_Bacon')
 
 ■■■■■■■■■■■■■0623 수업中 새로 알게된것■■■■■■■■■■■■■
 
+뷰티풀솝 : 파싱
+셀레니움 : 클릭(웹페이지 넘어갈 때 多), 타이핑, 마우스 움직이기 등 전부 다 할 수 있게 해줌
+
+from selenium import webdriver
+webdriver.Chrome('C:/Users/hs-702/Desktop/kjeon/chromedriver_win32/chromedriver.exe')
+ # driver : BeautifulSoup의 bs의 역할을 함
+
+태그 찾기
+	- driver.find_element_by_id( ) 	: id로 태그 찾기
+	- driver.find_element_by_class( ) 	: class로 태그 찾기
+	- driver.find_element_by_tag_name( )	: tag name으로 태그 찾기
+	  ㆍㆍㆍ
+
+driver.find_element_by_...	→ find( )과 유사, 하나의 태그만 가져옴
+driver.find_elements_by_...	→ find_all( )과 유사, 모든 태그 가져옴
+
+태그 위치 불러오기 : 개발자도구 F12 → 원하는 부분의 html코드 우클릭 → Copy → Copy Full XPath
+	ex_  /html/body/header/div/nav/label,  /html/body/main/div/div/div[2]/h3
+
+============================================================
+
 from selenium import webdriver
 import time
 

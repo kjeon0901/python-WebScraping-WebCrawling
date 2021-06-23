@@ -2,7 +2,7 @@ from selenium import webdriver
 
 url = 'https://pjt3591oo.github.io'
 
-driver = webdriver.Chrome('chromedriver')
+driver = webdriver.Chrome('C:/Users/hs-702/Desktop/kjeon/chromedriver_win32/chromedriver.exe')
 driver.get(url)
 
 selected_id = driver.find_element_by_id('nav-trigger')
