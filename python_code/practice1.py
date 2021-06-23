@@ -1,5 +1,6 @@
 from urllib.request import urlopen
 from bs4 import BeautifulSoup
+import re
 
 ######### 재귀횟수 9번 (처음 실행까지 10번) => 웹페이지 10개 크롤링할 것임. 
 ######### kevin bacon 위키백과 Contents 목차 1순위들만을 crawling해서 목차에 대한 데이터를 리스트로 담기
@@ -22,10 +23,11 @@ def getLinks(pageUrl):
     contents = []
     try: # 목차 리스트 담기
         contents.append(bs.h1.get_text())
-        print(bs.find('div', {'class':"toctitle"}).next_siblings)
-        #for child in bs.find('div', class_="toctitle").next_siblings.li.a.get_text():
-        #    print(child)
-        #    contents.append(bs.find('a').get_text())
+        all_li = bs.find('div', {'id':"toc"}).ul.find_all('li', class_=re.compile('^(toclevel-1 tocsection-).*$'))
+        for li in all_li:
+            contents.append(li.find('span', {'class':'toctext'}).get_text())
+
+
     except AttributeError:
         print('This page is missing something! Continuing.')
     print(contents)
