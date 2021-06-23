@@ -977,7 +977,7 @@ from bs4 import BeautifulSoup
 import re
 
 ######### 문제 2. 재귀횟수 9번 (처음 실행까지 10번) => 웹페이지 10개 크롤링할 것임. 
-######### kevin bacon 위키백과 Contents 목차 1순위들만을 crawling해서 목차에 대한 데이터를 리스트로 담기
+######### kevin bacon 위키백과 Contents 목차 "1순위들만"을 crawling해서 목차에 대한 데이터를 리스트로 담기
 ######### [페이지제목(Kevin Bacon), Contents 1., Contents 2., Contents 3.] 이거 10개를 또 큰 리스트에 담기
 
 pages = set()
@@ -998,8 +998,10 @@ def getLinks(pageUrl):
     try: # 목차 리스트 담기
         contents.append(bs.h1.get_text())
         all_li = bs.find('div', {'id':"toc"}).ul.find_all('li', class_=re.compile('^(toclevel-1 tocsection-).*$'))
-        for li in all_li:
-            contents.append(li.find('span', {'class':'toctext'}).get_text())
+        # 현재 all_li에 들어있는 건 li 하나가 아닌 li 리스트 뭉텅이가 들어 있기 때문에 all_li.find('span', {'class':'toctext'}).get_text()) 이렇게 바로 접근하면 안 됨!!
+        # => AttributeError나서 except문으로 빠지게 됨
+        for li in all_li: # 그래서 이렇게 for문으로 넘겨줘서 여기서 find해준다!
+            contents.append(li.find('span', {'class':'toctext'}).get_text()) # 대신 list.a.get_text() 해줘도 된다. 
 
 
     except AttributeError:
@@ -1024,8 +1026,73 @@ getLinks('/wiki/Kevin_Bacon')
 
 ■■■■■■■■■■■■■0623 수업中 새로 알게된것■■■■■■■■■■■■■
 
+from selenium import webdriver
+import time
+
+#### Selenium으로 url 자동으로 열어 검색창에 검색해보기
 
 
+driver = webdriver.Chrome('C:/Users/hs-702/Desktop/kjeon/chromedriver_win32/chromedriver.exe')
+url1 = 'https://www.naver.com'
+url2 = 'https://www.google.com'
+url3 = 'https://github.com/kjeon0901'
+
+driver.get(url1)
+# 네이버 검색창 input id : query
+n_search_box = driver.find_element_by_id("query")
+n_search_box.send_keys("크루엘라 평점") # 검색할 문자열을 키로 보낸 후
+n_search_box.submit() # 검색버튼 눌러줌
+time.sleep(1)
+
+driver.get(url2)
+# 구글 검색창 input name : q
+g_search_box = driver.find_element_by_name("q")
+g_search_box.send_keys("빌보드 차트 순위")
+g_search_box.submit()
+time.sleep(1)
+
+driver.get(url3)
+time.sleep(1)
+driver.quit()
+
+=============================================================
+
+from selenium import webdriver
+from selenium.webdriver.common.keys import Keys 
+from selenium.webdriver.chrome.options import Options
+import time
+
+#### Selenium으로 네이버 자동 로그인해보기
+
+
+path = 'C:/Users/hs-702/Desktop/kjeon/chromedriver_win32/chromedriver.exe'
+url = 'https://naver.com'
+
+id_ = ""
+pw_ = ""
+
+# 크롬 옵션 정의 (1이 허용, 2가 차단)
+chrome_options = Options() 
+prefs = {"profile.default_content_setting_values.notifications": 2} 
+chrome_options.add_experimental_option("prefs", prefs)
+
+driver = webdriver.Chrome(path, options=chrome_options)
+driver.get(url)
+
+click = driver.find_element_by_class_name("link_login")
+click.click()
+login_box = driver.find_element_by_id("id")
+login_box.send_keys(id_)
+time.sleep(1)
+login_box = driver.find_element_by_id("pw")
+login_box.send_keys(pw_)
+time.sleep(1)
+login_box.send_keys(Keys.RETURN) # Keys.ENTER도 가능
+time.sleep(1) 
+
+driver.quit()
+
+===========================================================
 
 
 

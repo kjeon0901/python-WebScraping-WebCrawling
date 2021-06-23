@@ -1,49 +1,41 @@
-from urllib.request import urlopen
-from bs4 import BeautifulSoup
-import re
+from selenium import webdriver
+from selenium.webdriver.common.keys import Keys 
+from selenium.webdriver.chrome.options import Options
+import time
 
-######### 문제 2. 재귀횟수 9번 (처음 실행까지 10번) => 웹페이지 10개 크롤링할 것임. 
-######### kevin bacon 위키백과 Contents 목차 1순위들만을 crawling해서 목차에 대한 데이터를 리스트로 담기
-######### [페이지제목(Kevin Bacon), Contents 1., Contents 2., Contents 3.] 이거 10개를 또 큰 리스트에 담기
-
-pages = set()
-recursion = 9
-total_contents = []
-def getLinks(pageUrl):
-    global pages
-    global recursion
-    global total_contents
-    if recursion==-1:
-        return
-    if recursion <9:
-        print("=============== 재귀", 9-recursion, "===============")
-
-    html = urlopen('http://en.wikipedia.org{}'.format(pageUrl))
-    bs = BeautifulSoup(html, 'html.parser')
-    contents = []
-    try: # 목차 리스트 담기
-        contents.append(bs.h1.get_text())
-        all_li = bs.find('div', {'id':"toc"}).ul.find_all('li', class_=re.compile('^(toclevel-1 tocsection-).*$'))
-        for li in all_li:
-            contents.append(li.find('span', {'class':'toctext'}).get_text())
+#### Selenium으로 네이버 자동 로그인해보기
 
 
-    except AttributeError:
-        print('This page is missing something! Continuing.')
-    print(contents)
-    total_contents.append(contents)
-    
-    for link in bs.find('div', {'id':'bodyContent'}).find_all('a', href=re.compile('^(/wiki/)((?!:).)*$')):
-        if 'href' in link.attrs:
-            if '(disambiguation)' in link.attrs['href']:
-                continue
-            if link.attrs['href'] not in pages:
-                #We have encountered a new page
-                newPage = link.attrs['href']
-                print('-'*20)
-                print(newPage)
-                pages.add(newPage)
-                recursion-=1
-                return getLinks(newPage) # 재귀함수. 
-            
-getLinks('/wiki/Kevin_Bacon')
+path = 'C:/Users/hs-702/Desktop/kjeon/chromedriver_win32/chromedriver.exe'
+url = 'https://naver.com'
+
+id_ = ""
+pw_ = ""
+
+# 크롬 옵션 정의 (1이 허용, 2가 차단)
+chrome_options = Options() 
+prefs = {"profile.default_content_setting_values.notifications": 2} 
+chrome_options.add_experimental_option("prefs", prefs)
+
+driver = webdriver.Chrome(path, options=chrome_options)
+driver.get(url)
+
+click = driver.find_element_by_class_name("link_login")
+click.click()
+login_box = driver.find_element_by_id("id")
+login_box.send_keys(id_)
+time.sleep(1)
+login_box = driver.find_element_by_id("pw")
+login_box.send_keys(pw_)
+time.sleep(1)
+login_box.send_keys(Keys.RETURN) # Keys.ENTER도 가능
+time.sleep(1) 
+
+driver.quit()
+
+
+
+
+
+
+
