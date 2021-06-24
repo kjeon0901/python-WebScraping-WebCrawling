@@ -14,10 +14,12 @@ for idx, category in enumerate(bs.find_all('div', {'class':'main_component dropp
     print("\n======",category.h4.get_text(), "======")
     for title in category.find('ul').find_all('li'):
         if idx==0:
-            print(url+title.a.get("href"))
+            print(bs.find('div', {'id':'gnb_search_lstwrp'}))
+            #print(bs.find('ul', class_='gnb_search_lst gnb_first').find('li'))
+            #.next_sibling.a.get('href')+title.a.get("href"))
             print(title.a.get_text())
         else:
             print(title.a.get("href"))
             print(title.a.strong.get_text())
         
-driver.quit()
+#driver.quit()
