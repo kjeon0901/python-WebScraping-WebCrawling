@@ -11,11 +11,10 @@ driver.find_element_by_xpath('/html/body/div[2]/div[2]/div[2]/div[1]/div[1]/ul[2
 bs = BeautifulSoup(driver.page_source)
 
 for idx, category in enumerate(bs.find_all('div', {'class':'main_component droppable'})):
-    print("\n======",category.find('div', {'class':'com_header'}).h4.get_text(), "======")
+    print("\n======",category.h4.get_text(), "======")
     for title in category.find('ul', {'class':{'hdline_article_list', 'mlist2 no_bg'}}).find_all('li'):
         if idx==0:
             print(title.a.get_text())
         else:
             print(title.a.strong.get_text())
-
 driver.quit()
