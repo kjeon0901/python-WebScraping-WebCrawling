@@ -1026,8 +1026,9 @@ getLinks('/wiki/Kevin_Bacon')
 
 ■■■■■■■■■■■■■0623 수업中 새로 알게된것■■■■■■■■■■■■■
 
-뷰티풀솝 : 파싱
-셀레니움 : 클릭(웹페이지 넘어갈 때 多), 타이핑, 마우스 움직이기 등 전부 다 할 수 있게 해줌
+뷰티풀솝 : 파싱 - 기본으로 사용
+셀레니움 : 클릭(웹페이지 넘어갈 때 多), 타이핑, 마우스 움직이기 등 - 필요할 때 사용
+두 개를 같이 쓰자. 
 
 from selenium import webdriver
 webdriver.Chrome('C:/Users/hs-702/Desktop/kjeon/chromedriver_win32/chromedriver.exe')
@@ -1037,6 +1038,7 @@ webdriver.Chrome('C:/Users/hs-702/Desktop/kjeon/chromedriver_win32/chromedriver.
 	- driver.find_element_by_id( ) 	: id로 태그 찾기
 	- driver.find_element_by_class( ) 	: class로 태그 찾기
 	- driver.find_element_by_tag_name( )	: tag name으로 태그 찾기
+	- driver.find_element_by_xpath( )	: Copy Full XPath로 태그 찾기
 	  ㆍㆍㆍ
 
 driver.find_element_by_...	→ find( )과 유사, 하나의 태그만 가져옴
@@ -1044,6 +1046,8 @@ driver.find_elements_by_...	→ find_all( )과 유사, 모든 태그 가져옴
 
 태그 위치 불러오기 : 개발자도구 F12 → 원하는 부분의 html코드 우클릭 → Copy → Copy Full XPath
 	ex_  /html/body/header/div/nav/label,  /html/body/main/div/div/div[2]/h3
+
+.click() : 태그 클릭하기
 
 ============================================================
 
@@ -1113,13 +1117,43 @@ time.sleep(1)
 
 driver.quit()
 
-===========================================================
-
-
-
-
-
 ■■■■■■■■■■■■■0624 수업中 새로 알게된것■■■■■■■■■■■■■
+
+from bs4 import BeautifulSoup
+from selenium import webdriver
+import time
+
+#### BeautifulSoup, Selenium 같이 사용하여, 네이버 사전 자동으로 열어 태그 text 긁어오기
+
+# Selenium 객체 driver로 페이지 클릭해 접속하기
+driver = webdriver.Chrome('C:/Users/hs-702/Desktop/kjeon/chromedriver_win32/chromedriver.exe')
+url = 'https://www.naver.com'
+driver.get(url)
+
+# 네이버에서 사전 클릭하여 네이버 사전 페이지로 접속하기
+driver.find_element_by_xpath('/html/body/div[2]/div[2]/div[2]/div[1]/div[1]/ul[2]/li[1]/a').click()
+
+# BeurifulSoup 객체 bs로 html 파싱해서 원하는 text 가져오기
+bs = BeautifulSoup(driver.page_source) # 여기서 html 넣어줘야 하므로 (html == driver.page_source)
+
+temp = bs.find('div', {'id':'content'}).find_all('h2')
+for var in temp:
+    print(var.get_text())
+
+time.sleep(1)
+driver.quit()
+
+=============================================================
+
+
+
+
+
+
+
+
+
+
 ■■■■■■■■■■■■■0625 수업中 새로 알게된것■■■■■■■■■■■■■
 ■■■■■■■■■■■■■0628 수업中 새로 알게된것■■■■■■■■■■■■■
 ■■■■■■■■■■■■■0629 수업中 새로 알게된것■■■■■■■■■■■■■

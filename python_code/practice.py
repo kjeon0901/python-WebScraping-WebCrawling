@@ -1,28 +1,23 @@
+from bs4 import BeautifulSoup
 from selenium import webdriver
 import time
 
-#### Selenium으로 url 자동으로 열어 검색창에 검색해보기
+#### BeautifulSoup, Selenium 같이 사용하여, 네이버 사전 자동으로 열어 태그 text 긁어오기
 
-
+# Selenium 객체 driver로 페이지 클릭해 접속하기
 driver = webdriver.Chrome('C:/Users/hs-702/Desktop/kjeon/chromedriver_win32/chromedriver.exe')
-url1 = 'https://www.naver.com'
-url2 = 'https://www.google.com'
-url3 = 'https://github.com/kjeon0901'
+url = 'https://www.naver.com'
+driver.get(url)
 
-driver.get(url1)
-# 네이버 검색창 input id : query
-n_search_box = driver.find_element_by_id("query")
-n_search_box.send_keys("크루엘라 평점") # 검색할 문자열을 키로 보낸 후
-n_search_box.submit() # 검색버튼 눌러줌
-time.sleep(1)
+# 네이버에서 사전 클릭하여 네이버 사전 페이지로 접속하기
+driver.find_element_by_xpath('/html/body/div[2]/div[2]/div[2]/div[1]/div[1]/ul[2]/li[1]/a').click()
 
-driver.get(url2)
-# 구글 검색창 input name : q
-g_search_box = driver.find_element_by_name("q")
-g_search_box.send_keys("빌보드 차트 순위")
-g_search_box.submit()
-time.sleep(1)
+# BeurifulSoup 객체 bs로 html 파싱해서 원하는 text 가져오기
+bs = BeautifulSoup(driver.page_source) # 여기서 html 넣어줘야 하므로 (html == driver.page_source)
 
-driver.get(url3)
+temp = bs.find('div', {'id':'content'}).find_all('h2')
+for var in temp:
+    print(var.get_text())
+
 time.sleep(1)
 driver.quit()
