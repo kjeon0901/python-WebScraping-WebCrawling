@@ -1048,6 +1048,7 @@ driver.find_elements_by_...	→ find_all( )과 유사, 모든 태그 가져옴
 	ex_  /html/body/header/div/nav/label,  /html/body/main/div/div/div[2]/h3
 
 .click() : 태그 클릭하기
+attr(속성) : 선택한 속성의 값을 가져오기
 
 ============================================================
 
@@ -1170,6 +1171,8 @@ for idx, category in enumerate(bs.find_all('div', {'class':'main_component dropp
             print(title.a.strong.get_text())
             
 driver.quit()
+
+============================================================
 
 
 
