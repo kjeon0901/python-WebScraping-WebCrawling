@@ -7,6 +7,11 @@
 	※ 또 다른 방법이 있을 수 있음. 노하우 쌓이면 그렇게 하기. 
 https://regexr.com/ 정규표현식과 문자열 match하는지 확인하는 사이트
 F12에서 찾을때 => html코드 눌러서 Ctrl+f 누르면 찾는 곳 나옴. 
+F12 - Network - 새로고침: 서버와 통신하면서 주고받은 애들 나옴
+	Headers : 헤더정보 나옴
+	Headers - Request Headers - user-agent : 내가 어떤 걸 이용해서 서버에 request 보냈는지에 대한 정보
+세션 - 서버가 가지고 있음
+쿠키 - 브라우저가 가지고 있음 (txt파일), html.headers에 있음. 
 주소창에 입력하는 게 url = 서버주소 + 페이지주소
 도메인주소 = 서버주소 = 어떤 ip주소(숫자값)를 나타냄
 절대경로	> 문서의 위치를 가르키는 도메인을 포함한 전체 위치정보
@@ -1051,7 +1056,7 @@ driver.~~~.click() : 태그 클릭하기
 driver.~~~.get('key') : 태그의 해당 value값 가져오기
 driver.current_url : 현재 페이지 주소
 
-============================================================
+■■■■■■■■■■■■■0624 수업中 새로 알게된것■■■■■■■■■■■■■
 
 from selenium import webdriver
 import time
@@ -1119,7 +1124,7 @@ time.sleep(1)
 
 driver.quit()
 
-■■■■■■■■■■■■■0624 수업中 새로 알게된것■■■■■■■■■■■■■
+=============================================================
 
 from bs4 import BeautifulSoup
 from selenium import webdriver
@@ -1145,13 +1150,13 @@ for var in temp:
 time.sleep(1)
 driver.quit()
 
-=============================================================
+■■■■■■■■■■■■■0625 수업中 새로 알게된것■■■■■■■■■■■■■
 
 from bs4 import BeautifulSoup
 from selenium import webdriver
 import time
 
-#### 네이버 뉴스 - 7분야 각각의 탭에서 탭 + 5가지 요약문 출력  (BeautifulSoup, Selenium 같이 사용)
+#### 네이버 뉴스 - 7분야 각각의 탭에서 카테고리+ 5가지 요약문 출력  (BeautifulSoup, Selenium 같이 사용)
 
 url = 'https://naver.com'
 driver = webdriver.Chrome('C:/Users/hs-702/Desktop/kjeon/chromedriver_win32/chromedriver.exe')
@@ -1175,14 +1180,34 @@ driver.quit()
 
 ============================================================
 
+from bs4 import BeautifulSoup
+from selenium import webdriver
+import time
+
+#### 네이버 뉴스 - 7분야 각각의 탭에서 카테고리 + url(상대경로도 모두 절대경로로) + 5가지 요약문 출력  (BeautifulSoup, Selenium 같이 사용)
+
+url = 'https://naver.com'
+driver = webdriver.Chrome('C:/Users/hs-702/Desktop/kjeon/chromedriver_win32/chromedriver.exe')
+driver.get(url)
+driver.find_element_by_xpath('/html/body/div[2]/div[2]/div[3]/div[1]/div[1]/ul[2]/li[2]/a').click()
+
+bs = BeautifulSoup(driver.page_source)
+
+for idx, category in enumerate(bs.find_all('div', {'class':'main_component droppable'})):
+    print("\n======",category.h4.get_text(), "======")
+    for title in category.find('ul').find_all('li'):
+        if idx==0:
+            print(driver.current_url + title.a.get("href"))
+            print(title.a.get_text())
+        else:
+            print(title.a.get("href"))
+            print(title.a.strong.get_text())
+#driver.quit()
+
+=============================================================
 
 
 
-
-
-
-
-■■■■■■■■■■■■■0625 수업中 새로 알게된것■■■■■■■■■■■■■
 ■■■■■■■■■■■■■0628 수업中 새로 알게된것■■■■■■■■■■■■■
 ■■■■■■■■■■■■■0629 수업中 새로 알게된것■■■■■■■■■■■■■
 ■■■■■■■■■■■■■0630 수업中 새로 알게된것■■■■■■■■■■■■■
