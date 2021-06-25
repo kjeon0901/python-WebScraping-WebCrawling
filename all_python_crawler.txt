@@ -1276,7 +1276,6 @@ for idx, category in enumerate(bs.find_all('div', {'class':'main_component dropp
         1. children 쓰면 보이지 않는 잡다한 애들까지 다 잡히는 경우 多   →   find_all('li') 처럼 태그를 딱 지칭해주는 게 BETTER
         2. 이 부분에선 사실 'ul'태그가 하나씩밖에 없음   →   여기선 굳이 {'class':{'hdline_article_list', 'mlist2 no_bg'}} 이렇게 특정하지 않아도 됨. 
         '''
-        article_total = []
         if idx==0:
             news_title = title.a.get_text()
             news_url = driver.current_url + title.a.get("href")
@@ -1292,10 +1291,7 @@ for idx, category in enumerate(bs.find_all('div', {'class':'main_component dropp
         print(news_date) # 기사별 입력날짜데이터 출력
         time.sleep(0.5)
         
-        article_total.append(news_title)
-        article_total.append(news_url)
-        article_total.append(news_date)
-        category_total.append(article_total)
+        category_total.append([news_title, news_url, news_date]) # 리스트에 담기
     total.append(category_total)
         
 #driver.quit()
