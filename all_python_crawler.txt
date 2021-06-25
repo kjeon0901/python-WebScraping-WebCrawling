@@ -1152,39 +1152,111 @@ driver.quit()
 
 ■■■■■■■■■■■■■0625 수업中 새로 알게된것■■■■■■■■■■■■■
 
+import requests
 from bs4 import BeautifulSoup
 from selenium import webdriver
+from urllib.request import urlopen
 import time
 
-#### 네이버 뉴스 - 7분야 각각의 탭에서 카테고리+ 5가지 요약문 출력  (BeautifulSoup, Selenium 같이 사용)
+url = 'https://www.naver.com'
+'''
+url = 'https://news.naver.com' 로 바꾸면 => Remote end closed connection without response 에러 뜸. 
+url = 'https://news.naver.com/main/read.nhn?mode=LSD&mid=shm&sid1=102&oid=448&aid=0000332119' 이렇게 기사 하나 접근해도 에러 뜸. 
+웹브라우저를 거치지 않고 파이썬으로 urlopen 이라는 request를 통해 직접 html을 가져오는 게 훨씬 빠름.
+근데, 웹브라우저로 접근하면 접근 가능하고, 파이썬으로 접근하면 접근 에러 뜸. 
+    => 네이버에서 브라우저로 접근하는 것 vs. 파이썬으로 접근하는 것 구분짓는 어떤 걸 가지고 있구나!
+    => ★★★ 얘를 속여서 fake로 우회하는 방법이 필요하겠군!! ★★★
+'''
+html = urlopen(url)
+print(html.headers)
+'''
+Server: NWS
+Date: Fri, 25 Jun 2021 01:44:33 GMT
+Content-Type: text/html; charset=UTF-8
+Transfer-Encoding: chunked
+Connection: close
+Set-Cookie: PM_CK_loc=3232355beb513edf3f28c441f6ad912584637d53608e6f52db25aa25b48df3fb; Expires=Sat, 26 Jun 2021 01:44:33 GMT; Path=/; HttpOnly
+Cache-Control: no-cache, no-store, must-revalidate
+Pragma: no-cache
+P3P: CP="CAO DSP CURa ADMa TAIa PSAa OUR LAW STP PHY ONL UNI PUR FIN COM NAV INT DEM STA PRE"
+X-Frame-Options: DENY
+X-XSS-Protection: 1; mode=block
+Strict-Transport-Security: max-age=63072000; includeSubdomains
+Referrer-Policy: unsafe-url
+--------------------------------------------------------------------------------------
+HTTP 쿠키
+    - 서버가 브라우저에게 전송하는 데이터
+    - 클라이언트는 이를 작은 txt파일로 저장한 다음에 다시 서버에게 전송
+Set-Cookie
+    - 서버는 Set-Cookie 헤더를 설정하여 응답과 함께 전송하고 쿠키는 브라우저에 저장
+'''
 
-url = 'https://naver.com'
-driver = webdriver.Chrome('C:/Users/hs-702/Desktop/kjeon/chromedriver_win32/chromedriver.exe')
-driver.get(url)
-driver.find_element_by_xpath('/html/body/div[2]/div[2]/div[2]/div[1]/div[1]/ul[2]/li[2]/a').click()
-bs = BeautifulSoup(driver.page_source)
+===========================================================
 
-for idx, category in enumerate(bs.find_all('div', {'class':'main_component droppable'})):
-    print("\n======",category.h4.get_text(), "======")
-    for title in category.find('ul', {'class':{'hdline_article_list', 'mlist2 no_bg'}}).find_all('li'):
-        '''
-        1. children 쓰면 보이지 않는 잡다한 애들까지 다 잡히는 경우 多   →   find_all('li') 처럼 태그를 딱 지칭해주는 게 BETTER
-        2. 이 부분에선 사실 'ul'태그가 하나씩밖에 없음   →   여기선 굳이 {'class':{'hdline_article_list', 'mlist2 no_bg'}} 이렇게 특정하지 않아도 됨. 
-        '''
-        if idx==0:
-            print(title.a.get_text())
-        else:
-            print(title.a.strong.get_text())
-            
-driver.quit()
+import requests
+from bs4 import BeautifulSoup
+from selenium import webdriver
+from urllib.request import urlopen
+import time
+
+url = 'https://www.naver.com'
+
+html2 = requests.get(url)
+bs = BeautifulSoup(html2.text)
+print(html2.request.headers)
+'''
+{'User-Agent': 'python-requests/2.24.0', 'Accept-Encoding': 'gzip, deflate', 'Accept': '*/*', 'Connection': 'keep-alive'}
+--------------------------------------------------------------------------------------
+User-Agent
+    - 내가 어떤 걸 이용해서 서버에 request 보냈는지에 대한 정보!
+    - 여기서 'python-requests/2.24.0'가 들어있으므로 "내가 파이썬이다!"라는 걸 알려주면서 네이버에 접근하게 되는 것!
+        => 이걸 살짝 바꿔서 우회해주자. 
+'''
 
 ============================================================
 
+import requests
 from bs4 import BeautifulSoup
 from selenium import webdriver
+from urllib.request import urlopen
 import time
 
-#### 네이버 뉴스 - 7분야 각각의 탭에서 카테고리 + url(상대경로도 모두 절대경로로) + 5가지 요약문 출력  (BeautifulSoup, Selenium 같이 사용)
+# url = 'https://www.naver.com'
+url = 'https://news.naver.com'
+
+var = {'user-agent' : 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36'}
+# 네이버에서 F12 - Network - 새로고침 - Headers - Request Headers - user-agent 가져와서 이렇게 key, value값으로 넣어줌
+html3 = requests.get(url, headers = var) # 그 정보를 headers로 넣어줌. 
+bs = BeautifulSoup(html3.text)
+print(html3.request.headers)
+'''
+{'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36', 'Accept-Encoding': 'gzip, deflate', 'Accept': '*/*', 'Connection': 'keep-alive'}
+--------------------------------------------------------------------------------------
+User-Agent
+    - 아까와 다르게 'python-requests/2.24.0'이 아니라 '~~~ Chrome/91.0.4472.114 Safari/537.36'이 들어 있으므로
+      "내가 크롬이다!"라는 걸 알려주면서 네이버에 접근하게 되는 것!
+
+=> 우회 잘 되었군!
+url = 'https://www.naver.com'
+url = 'https://news.naver.com'
+둘 다 잘 접근 잘 된다. 
+'''
+
+=============================================================
+
+import requests
+from bs4 import BeautifulSoup
+from selenium import webdriver
+from urllib.request import urlopen
+import time
+
+#### BeautifulSoup, Selenium 같이 사용
+#### [네이버 뉴스] - 7분야 각각의 탭에서 카테고리 + url(상대경로도 모두 절대경로로) + 5가지 요약문 + 각각의 기사입력 날짜데이터 출력
+'''
+각각의 기사입력 날짜데이터 출력   - RemoteDisconnected: Remote end closed connection without response 접근 에러
+                                - 우회 필요
++ 너무 빨리 계속하면 네이버에서 내 ip를 아예 차단시켜 버림. time.sleep(0.5)로 딜레이하도록 !
+'''
 
 url = 'https://naver.com'
 driver = webdriver.Chrome('C:/Users/hs-702/Desktop/kjeon/chromedriver_win32/chromedriver.exe')
@@ -1192,21 +1264,29 @@ driver.get(url)
 driver.find_element_by_xpath('/html/body/div[2]/div[2]/div[3]/div[1]/div[1]/ul[2]/li[2]/a').click()
 
 bs = BeautifulSoup(driver.page_source)
+var = {'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36'} # 우회하기 위함
 
 for idx, category in enumerate(bs.find_all('div', {'class':'main_component droppable'})):
     print("\n======",category.h4.get_text(), "======")
-    for title in category.find('ul').find_all('li'):
+    for idx2, title in enumerate(category.find('ul').find_all('li')):
+        '''
+        1. children 쓰면 보이지 않는 잡다한 애들까지 다 잡히는 경우 多   →   find_all('li') 처럼 태그를 딱 지칭해주는 게 BETTER
+        2. 이 부분에선 사실 'ul'태그가 하나씩밖에 없음   →   여기선 굳이 {'class':{'hdline_article_list', 'mlist2 no_bg'}} 이렇게 특정하지 않아도 됨. 
+        '''
         if idx==0:
-            print(driver.current_url + title.a.get("href"))
             print(title.a.get_text())
+            urlpath = driver.current_url + title.a.get("href")
         else:
-            print(title.a.get("href"))
             print(title.a.strong.get_text())
+            urlpath = title.a.get("href")
+        print(urlpath)
+        
+        html = requests.get(urlpath, headers = var) # var에 담긴 fake user-agent 정보를 headers로 넣어줌. 
+        bs2 = BeautifulSoup(html.text)
+        print(bs2.find('span', {'class':'t11'}).get_text())
+        time.sleep(0.5)
+        
 #driver.quit()
-
-=============================================================
-
-
 
 ■■■■■■■■■■■■■0628 수업中 새로 알게된것■■■■■■■■■■■■■
 ■■■■■■■■■■■■■0629 수업中 새로 알게된것■■■■■■■■■■■■■

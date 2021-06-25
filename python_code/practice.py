@@ -4,27 +4,23 @@ from selenium import webdriver
 from urllib.request import urlopen
 import time
 
-url = 'https://www.naver.com'
-'''
-url = 'https://news.naver.com' 로 바꾸면 => Remote end closed connection without response 에러 뜸. 
-url = 'https://news.naver.com/main/read.nhn?mode=LSD&mid=shm&sid1=102&oid=448&aid=0000332119' 이렇게 기사 하나 접근해도 에러 뜸. 
-★★★ 우회가 필요하다!! ★★★
+# url = 'https://www.naver.com'
+url = 'https://news.naver.com'
 
+var = {'user-agent' : 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36'}
+# 네이버에서 F12 - Network - 새로고침 - Headers - Request Headers - user-agent 가져와서 이렇게 key, value값으로 넣어줌
+html3 = requests.get(url, headers = var) # 그 정보를 headers로 넣어줌. 
+bs = BeautifulSoup(html3.text)
+print(html3.request.headers)
 '''
-html = urlopen(url)
-print(html.headers)
-'''
-Server: NWS
-Date: Fri, 25 Jun 2021 01:44:33 GMT
-Content-Type: text/html; charset=UTF-8
-Transfer-Encoding: chunked
-Connection: close
-Set-Cookie: PM_CK_loc=3232355beb513edf3f28c441f6ad912584637d53608e6f52db25aa25b48df3fb; Expires=Sat, 26 Jun 2021 01:44:33 GMT; Path=/; HttpOnly
-Cache-Control: no-cache, no-store, must-revalidate
-Pragma: no-cache
-P3P: CP="CAO DSP CURa ADMa TAIa PSAa OUR LAW STP PHY ONL UNI PUR FIN COM NAV INT DEM STA PRE"
-X-Frame-Options: DENY
-X-XSS-Protection: 1; mode=block
-Strict-Transport-Security: max-age=63072000; includeSubdomains
-Referrer-Policy: unsafe-url
+{'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36', 'Accept-Encoding': 'gzip, deflate', 'Accept': '*/*', 'Connection': 'keep-alive'}
+--------------------------------------------------------------------------------------
+User-Agent
+    - 아까와 다르게 'python-requests/2.24.0'이 아니라 '~~~ Chrome/91.0.4472.114 Safari/537.36'이 들어 있으므로
+      "내가 크롬이다!"라는 걸 알려주면서 네이버에 접근하게 되는 것!
+
+=> 우회 잘 되었군!
+url = 'https://www.naver.com'
+url = 'https://news.naver.com'
+둘 다 잘 접근 잘 된다. 
 '''
