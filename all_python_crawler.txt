@@ -10,8 +10,11 @@ F12에서 찾을때 => html코드 눌러서 Ctrl+f 누르면 찾는 곳 나옴.
 F12 - Network - 새로고침: 서버와 통신하면서 주고받은 애들 나옴
 	Headers : 헤더정보 나옴
 	Headers - Request Headers - user-agent : 내가 어떤 걸 이용해서 서버에 request 보냈는지에 대한 정보
-세션 - 서버가 가지고 있음
-쿠키 - 브라우저가 가지고 있음 (txt파일), html.headers에 있음. 
+세션 - 서버-클라이언트 주고받은 내용을 서버가 데이터로 가지고 있음
+쿠키 - 서버-클라이언트 주고받은 내용을 내 컴퓨터의 웹 브라우저가 txt파일로 가지고 있음. html.headers에 있음. 
+캐시 - 캐시 메모리에 저장되어 있음
+      - 램, cpu, 메모리가 있는데 어떤 명령어 데이터들을 cpu에 보내 연산을 시켜야 하는데, 저 멀리 메모리에서 가져오는 것보다 cpu 바로 옆에 달린 캐시메모리에서 바로바로 꺼내 씀
+      - pc를 맨 처음 키고 처음 웹 브라우저를 실행하는 것과, 그걸 껐다가(캐시메모리에 저장돼있을 확률 Big) 다른 활동을 한 뒤 웹 브라우저를 실행하는 것을 비교하면 처음 실행한 게 더 오래 걸린다. 
 주소창에 입력하는 게 url = 서버주소 + 페이지주소
 도메인주소 = 서버주소 = 어떤 ip주소(숫자값)를 나타냄
 절대경로	> 문서의 위치를 가르키는 도메인을 포함한 전체 위치정보
@@ -1039,10 +1042,16 @@ getLinks('/wiki/Kevin_Bacon')
 	from bs4 import BeautifulSoup
 	bs = BeautifulSoup(html.text)
 셀레니움 : 클릭(웹페이지 넘어갈 때 多), 타이핑, 마우스 움직이기 등 - 필요할 때 사용
+	중간에 웹페이지 하나를 끼고 하는 것이라 속도가 느림. 최대한 지양. 
 	from selenium import webdriver
 	driver = webdriver.Chrome('~~~/chromedriver_win32/chromedriver.exe')
 	driver.get(url)
-두 개를 같이 쓰자. 
+requests : 셀레니움과 무관. 
+	html2 = requests.get(url)
+		- GET요청. 해당 url에 접속한 것과 같음. 
+		- 인수로 header값 설정 가능♣(거의 필수적)
+
+뷰티풀솝, 셀레니움 두 개를 같이 씀. 
 
 태그 찾기
 	- driver.find_element_by_id( ) 	: id로 태그 찾기
@@ -1206,7 +1215,7 @@ import time
 
 url = 'https://www.naver.com'
 
-html2 = requests.get(url)
+html2 = requests.get(url) # GET요청. 해당 url에 접속한 것과 같음. 
 bs = BeautifulSoup(html2.text)
 print(html2.request.headers)
 '''
@@ -1302,9 +1311,11 @@ for idx, category in enumerate(bs.find_all('div', {'class':'main_component dropp
 
 ■■■■■■■■■■■■■0628 수업中 새로 알게된것■■■■■■■■■■■■■
 
-## Crawling across the Internet
+### * Chapter04_CrawlingModels - 이어서
 
 ln [6] : 
+
+## Crawling across the Internet
 
 from urllib.request import urlopen
 from urllib.parse import urlparse
@@ -1322,11 +1333,9 @@ def getInternalLinks(bs, includeUrl): # 내부링크 : 같은 서버에 있는�
     internalLinks = []
     #Finds all links that begin with a "/"
     for link in bs.find_all('a', href=re.compile('^(/|.*'+includeUrl+')')): # /가 앞에 오든지, ~~~~includeUrl이 앞에 오든지
-                                '''
-                                / => 상대주소는 내부링크이므로, 시작이 /인 것 모두 찾아냄
-                                +includeUrl+ => 절대주소 중에서는 도메인주소 같으면 내부링크이므로, 도메인주소 같은 애들만 모두 찾아냄
-                                             => 변수 includeUrl에 담긴 값을 정규표현식에 넣어주기 위함                                
-                                '''
+                                # / => 상대주소는 내부링크이므로, 시작이 /인 것 모두 찾아냄
+                                # +includeUrl+ => 절대주소 중에서는 도메인주소 같으면 내부링크이므로, 도메인주소 같은 애들만 모두 찾아냄
+                                #              => 변수 includeUrl에 담긴 값을 정규표현식에 넣어주기 위함
         if link.attrs['href'] is not None: # find_all 했을 때 하나 이상 존재해야 함
             if link.attrs['href'] not in internalLinks: # 한 번 들어갔던 링크는 중복적으로 들어가지 않음
                 if(link.attrs['href'].startswith('/')): # 찾은 모든 링크 中 for문돌리고 있는 링크 하나가 /로 시작하는 상대주소이니?
@@ -1341,10 +1350,8 @@ def getExternalLinks(bs, excludeUrl): # 외부링크 : 아예 외부 서버에 �
     #Finds all links that start with "http" that do
     #not contain the current URL
     for link in bs.find_all('a', href=re.compile('^(http|www)((?!'+excludeUrl+').)*$')): 
-                                '''
-                                ^(http|www) => 상대주소도 모두 내부링크이므로, 상대주소는 걸러내고 절대주소에서만 외부링크 찾아야 함
-                                ((?!'+excludeUrl+').)* => 도메인주소 같으면 내부링크이므로, 도메인주소 다른 애들만 찾아야 함
-                                '''
+                                # ^(http|www) => 상대주소도 모두 내부링크이므로, 상대주소는 걸러내고 절대주소에서만 외부링크 찾아야 함
+                                # ((?!'+excludeUrl+').)* => 도메인주소 같으면 내부링크이므로, 도메인주소 다른 애들만 찾아야 함
         if link.attrs['href'] is not None: # find_all 했을 때 하나 이상 존재해야 함
             if link.attrs['href'] not in externalLinks: # 한 번 들어갔던 링크는 중복적으로 들어가지 않음
                 externalLinks.append(link.attrs['href'])
@@ -1377,11 +1384,67 @@ def followExternalOnly(startingSite):
     followExternalOnly(externalLink) # 재귀함수. 찾아낸 외부 링크에 들어가서 또 다시 외부 링크 찾아냄
             
 followExternalOnly('http://oreilly.com')
+'''
+Random external link is: https://twitter.com/oreillymedia
+No external links, looking around the site for one
+Random external link is: https://help.pscp.tv/customer/portal/articles/2932270
+Random external link is: https://business.twitter.com/en/advertising.html
+Random external link is: https://data.twitter.com/
+Random external link is: https://developer.twitter.com/en/use-cases/build-for-businesses/manage-social-media
+Random external link is: https://twitter.com/privacy
+Random external link is: https://pscp.tv/account/settings
+No external links, looking around the site for one
+...
+'''
 
-==============================================================
 
+ln [8] :
 
+## Collect all External Links from a Site - 위에 있는 함수 getInternalLinks, getExternalLinks 사용
 
+# Collects a list of all external URLs found on the site
+allExtLinks = set()
+allIntLinks = set()
+
+def getAllExternalLinks(siteUrl):
+    html = urlopen(siteUrl)
+    domain = '{}://{}'.format(urlparse(siteUrl).scheme, urlparse(siteUrl).netloc) # 도메인주소
+    bs = BeautifulSoup(html, 'html.parser')
+    internalLinks = getInternalLinks(bs, domain) # 모든 내부링크 리스트로 담아옴 (없으면 아무것도 안 담김)
+    externalLinks = getExternalLinks(bs, domain) # 모든 외부링크 리스트로 담아옴 (없으면 아무것도 안 담김)
+
+    for link in externalLinks:
+        if link not in allExtLinks:
+            allExtLinks.add(link) # 모든 외부링크 중복 없이 집합에 담음
+            print(link) # 외부링크 모두 출력
+    for link in internalLinks:
+        if link not in allIntLinks:
+            allIntLinks.add(link) # 모든 내부링크 중복 없이 집합에 담음. 근데 아래 코드로 인해 첫 번째 내부링크 때만 실행됨. 
+            getAllExternalLinks(link) # 재귀. 첫 번째 내부링크로 들어가서 또 다시 외부링크 모두 담고 출력, 한 번도 접근한 적 없는 첫번째 내부링크 담고 들어감.
+
+allIntLinks.add('http://oreilly.com')
+getAllExternalLinks('http://oreilly.com')
+'''
+https://www.oreilly.com
+http://www.oreilly.com/ideas
+https://www.safaribooksonline.com/?utm_medium=content&utm_source=oreilly.com&utm_campaign=lgen&utm_content=20170601+nav
+http://www.oreilly.com/conferences/
+http://shop.oreilly.com/
+http://members.oreilly.com
+https://www.oreilly.com/topics
+https://www.safaribooksonline.com/?utm_medium=content&utm_source=oreilly.com&utm_campaign=lgen&utm_content=20170505+homepage+get+started+now
+https://www.safaribooksonline.com/accounts/login/?utm_medium=content&utm_source=oreilly.com&utm_campaign=lgen&utm_content=20170203+homepage+sign+in
+https://www.safaribooksonline.com/live-training/?utm_medium=content&utm_source=oreilly.com&utm_campaign=lgen&utm_content=20170201+homepage+take+a+live+online+course
+...
+'''
+
+============================================================
+
+### * Chapter04_CrawlingModels
+
+ln [1] : 
+
+## Dealing with different website layouts
 
 
 

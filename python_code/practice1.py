@@ -4,7 +4,6 @@ from selenium import webdriver
 from urllib.request import urlopen
 import time
 
-#### BeautifulSoup, Selenium 같이 사용
 #### [네이버 뉴스] - 7분야 각각의 탭에서 카테고리 + 5가지 요약문 + 기사별 url(상대경로도 모두 절대경로로) + 기사별 입력날짜데이터 출력, 리스트에 넣기
 
 url = 'https://naver.com'
