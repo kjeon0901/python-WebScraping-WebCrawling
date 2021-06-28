@@ -745,9 +745,13 @@ links = getLinks('/wiki/Kevin_Bacon') # href=re.compile('^(/wiki/)((?!:).)*$') �
 while len(links) > 0: # 무한루프
     newArticle = links[random.randint(0, len(links)-1)].attrs['href'] # href값(링크) 전체를 랜덤으로 담음
     '''
-    np.random.randint(시드값, 개수) - 균일 분포의 정수 랜덤값 생성
-    np.random.rand(시드값, 개수)    - 0~1 균일 분포의 랜덤값 생성
-    np.random.randn(시드값, 개수)   - 가우시안 표준 정규 분포의 랜덤값 생성
+	np.random.randint(m, n) : m ~ n-1 사이의 랜덤 숫자 1개 뽑기. m 안써주면 0부터~
+	np.random.rand(m, n) : 0 ~ 1 의 '균일분포 표준정규분포' 랜덤 숫자를 (m, n) 크기로 생성.
+        		균일분포 == 상수함수(연속) : 샘플링한 값의 range가 0 ~ 1이고 0.3 ~ 0,4 사이의 그래프와 x축간의 면적은 "0.3 ~ 0.4 사이의 값이 뽑힐 확률"
+                                    		떨어진 간극만 같다면 걔네의 면적, 즉 확률도 같다. 
+	np.random.randn(m, n) : 평균 0, 표준편차 1의 '가우시안 표준정규분포' 랜덤 숫자를 (m, n) 크기로 생성
+        		정규분포 : 0.3 ~ 0.4 사이의 값이 뽑힐 확률과 0.4 ~ 0.5 사이의 값이 뽑힐 확률이 다르다. ex_히스토그램 distplot(정규분포, kde=True)
+	np.random.normal(평균, 표준편차, size) : 주어진 평균, 표준편차의 정규분포를 size만큼 생성
     '''
     print(newArticle)
     links = getLinks(newArticle) # 현재 a태그 속성 href값(링크) 안의 또다른 a태그를 가져옴. 
@@ -1297,5 +1301,19 @@ for idx, category in enumerate(bs.find_all('div', {'class':'main_component dropp
 #driver.quit()
 
 ■■■■■■■■■■■■■0628 수업中 새로 알게된것■■■■■■■■■■■■■
+
+## Crawling across the Internet
+
+ln [6] : 
+
+
+
+
+
+
+
+
+
+
 ■■■■■■■■■■■■■0629 수업中 새로 알게된것■■■■■■■■■■■■■
 ■■■■■■■■■■■■■0630 수업中 새로 알게된것■■■■■■■■■■■■■
