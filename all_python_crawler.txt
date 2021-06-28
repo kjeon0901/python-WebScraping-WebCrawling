@@ -234,6 +234,10 @@ print(cookies)
 
 ■■■■■■■■■■■■■0619 수업中 새로 알게된것■■■■■■■■■■■■■
 
+bs.find('div', {'id', 'a'}).find(p).find_all('div', {'class', 'className'}) == bs.select(div#a p div.className)
+
+=============================================================
+
 ### * Chapter01_BeginningToScrape
 
 ln [1] : 
@@ -1048,7 +1052,7 @@ getLinks('/wiki/Kevin_Bacon')
 	driver.get(url)
 requests : 셀레니움과 무관. 
 	html2 = requests.get(url)
-		- GET요청. 해당 url에 접속한 것과 같음. 
+		- GET요청. chrome, explorer 등 웹 브라우저를 거치지 않고 url이라는 서버에 접근해서 url웹페이지에 대한 코드를 가져옴. 
 		- 인수로 header값 설정 가능♣(거의 필수적)
 
 뷰티풀솝, 셀레니움 두 개를 같이 씀. 
@@ -1446,8 +1450,58 @@ ln [1] :
 
 ## Dealing with different website layouts
 
+from urllib.request import urlopen
+from urllib.parse import urlparse
+from bs4 import BeautifulSoup
+import re
+import datetime
+import random
+import requests
+
+class Content:
+    def __init__(self, url, title, body): # 생성자 Constructor : 초기화
+        self.url = url
+        self.title = title
+        self.body = body
 
 
+def getPage(url):
+    req = requests.get(url) # url에 접속. 
+    return BeautifulSoup(req.text, 'html.parser')
+
+
+def scrapeNYTimes(url):
+    bs = getPage(url)
+    title = bs.find('h1').text
+    lines = bs.select('div.StoryBodyCompanionColumn div p') # div태그 中 StoryBodyCompanionColumn클래스를 가진 태그의 자식태그 div의 자식태그 p로 이동. 
+    body = '\n'.join([line.text for line in lines]) # 각 요소 사이사이에 문자열 '\n' 넣어줌 => 하나의 긴 문자열이 됨. 
+    return Content(url, title, body) # Content 클래스 객체를 리턴
+
+def scrapeBrookings(url):
+    bs = getPage(url)
+    title = bs.find('h1').text
+    body = bs.find('div', {'class', 'post-body'}).text
+    return Content(url, title, body) # Content 클래스 객체를 리턴
+
+# 두 url의 도메인 주소가 다름. 
+url = 'https://www.brookings.edu/blog/future-development/2018/01/26/delivering-inclusive-urban-access-3-uncomfortable-truths/'
+content = scrapeBrookings(url) # 초기화된 Content 클래스 객체가 담김
+print('Title: {}'.format(content.title))
+print('URL: {}\n'.format(content.url))
+print(content.body)
+
+url = 'https://www.nytimes.com/2018/01/25/opinion/sunday/silicon-valley-immortality.html'
+content = scrapeNYTimes(url) # 초기화된 Content 클래스 객체가 담김
+print('Title: {}'.format(content.title))
+print('URL: {}\n'.format(content.url))
+print(content.body)
+
+
+ln [2] :
+
+ln [3] :
+
+ln [3] :
 
 
 
