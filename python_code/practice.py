@@ -1,86 +1,102 @@
-from urllib.request import urlopen
-from urllib.parse import urlparse
-from bs4 import BeautifulSoup
-import re
-import datetime
-import random
-import requests
+## Crawling through sites with search
+
+#ln [1] :
 
 class Content:
-    """
-    Common base class for all articles/pages
-    """
-    def __init__(self, url, title, body):
-        self.url = url
+    """Common base class for all articles/pages"""
+
+    def __init__(self, topic, url, title, body):
+        self.topic = topic
         self.title = title
         self.body = body
+        self.url = url
 
     def print(self):
         """
         Flexible printing function controls output
         """
+        print('New article found for topic: {}'.format(self.topic))
         print('URL: {}'.format(self.url))
         print('TITLE: {}'.format(self.title))
         print('BODY:\n{}'.format(self.body))
 
-class Website:
-    """ 
-    Contains information about website structure
-    """
 
-    def __init__(self, name, url, titleTag, bodyTag):
-        self.name = name
-        self.url = url
+#ln [2] :
+
+class Website:
+    """Contains information about website structure"""
+
+    def __init__(self, name, url, searchUrl, resultListing, resultUrl, absoluteUrl, titleTag, bodyTag):
+        self.name = name # 사이트이름
+        self.url = url # 사이트 도메인주소
+        self.searchUrl = searchUrl # 검색창url - 활용도Good!
+        self.resultListing = resultListing
+        self.resultUrl = resultUrl
+        self.absoluteUrl = absoluteUrl
         self.titleTag = titleTag
         self.bodyTag = bodyTag
 
 
+#ln [3] :
+
+import requests
+from bs4 import BeautifulSoup
+
 class Crawler:
 
-    def getPage(self, url): # url의 html을 파싱하기 위한 bs객체 리턴
+    def getPage(self, url):
         try:
-            req = requests.get(url) # url에 해당하는 html 코드 req에 받아서
+            req = requests.get(url)
         except requests.exceptions.RequestException:
             return None
-        return BeautifulSoup(req.text, 'html.parser') # html 코드
+        return BeautifulSoup(req.text, 'html.parser')
 
     def safeGet(self, pageObj, selector):
-        """
-        Utilty function used to get a content string from a Beautiful Soup
-        object and a selector. Returns an empty string if no object
-        is found for the given selector
-        """
-        selectedElems = pageObj.select(selector)
-        if selectedElems is not None and len(selectedElems) > 0: # 하나 이상 찾았을 때
-            return '\n'.join([elem.get_text() for elem in selectedElems])
+        childObj = pageObj.select(selector)
+        if childObj is not None and len(childObj) > 0:
+            return childObj[0].get_text()
         return ''
 
-    def parse(self, site, url):
+    def search(self, topic, site):
         """
-        Extract content from a given page URL
+        Searches a given website for a given topic and records all pages found
         """
-        bs = self.getPage(url)
-        if bs is not None: # 에러나지 않았을 경우
+        bs = self.getPage(site.searchUrl + topic) # '검색창에 topic을 검색'한 url에 해당하는 html을 파싱하는 객체
+        searchResults = bs.select(site.resultListing) # 검색 결과 모두 찾아서 담음
+        for result in searchResults:
+            url = result.select(site.resultUrl)[0].attrs['href']
+            # Check to see whether it's a relative or an absolute URL
+            if(site.absoluteUrl):
+                bs = self.getPage(url)
+            else:
+                bs = self.getPage(site.url + url)
+            if bs is None:
+                print('Something was wrong with that page or URL. Skipping!')
+                return
             title = self.safeGet(bs, site.titleTag)
             body = self.safeGet(bs, site.bodyTag)
-            if title != '' and body != '': # title, body 둘다 하나 이상의 값이 들어있으면
-                content = Content(url, title, body)
+            if title != '' and body != '':
+                content = Content(topic, title, body, url)
                 content.print()
-          
-                
+
+
 crawler = Crawler()
 
 siteData = [
-    ['O\'Reilly Media', 'http://oreilly.com', 'h1', 'section#product-description'],
-    ['Reuters', 'http://reuters.com', 'h1', 'div.StandardArticleBody_body_1gnLA'],
-    ['Brookings', 'http://www.brookings.edu', 'h1', 'div.post-body'],
-    ['New York Times', 'http://nytimes.com', 'h1', 'div.StoryBodyCompanionColumn div p']
+    ['O\'Reilly Media', 'http://oreilly.com', 'https://ssearch.oreilly.com/?q=',
+        'article.result', 'p.title a', True, 'h1', 'section#product-description'],
+    ['Reuters', 'http://reuters.com', 'http://www.reuters.com/search/news?blob=', 'div.search-result-content',
+        'h3.search-result-title a', False, 'h1', 'div.StandardArticleBody_body_1gnLA'],
+    ['Brookings', 'http://www.brookings.edu', 'https://www.brookings.edu/search/?s=',
+        'div.list-content article', 'h4.title a', True, 'h1', 'div.post-body']
 ]
-websites = []
-for row in siteData: # row : 리스트 하나
-    websites.append(Website(row[0], row[1], row[2], row[3])) # Website클래스 객체 하나씩 담음
+sites = []
+for row in siteData:
+    sites.append(Website(row[0], row[1], row[2],
+                         row[3], row[4], row[5], row[6], row[7]))
 
-crawler.parse(websites[0], 'http://shop.oreilly.com/product/0636920028154.do')
-crawler.parse(websites[1], 'http://www.reuters.com/article/us-usa-epa-pruitt-idUSKBN19W2D0')
-crawler.parse(websites[2], 'https://www.brookings.edu/blog/techtank/2016/03/01/idea-to-retire-old-methods-of-policy-education/')
-crawler.parse(websites[3], 'https://www.nytimes.com/2018/01/28/business/energy-environment/oil-boom.html')                
+topics = ['python', 'data science']
+for topic in topics:
+    print('GETTING INFO ABOUT: ' + topic)
+    for targetSite in sites:
+        crawler.search(topic, targetSite)
