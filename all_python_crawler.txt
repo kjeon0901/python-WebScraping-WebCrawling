@@ -235,6 +235,7 @@ print(cookies)
 ■■■■■■■■■■■■■0619 수업中 새로 알게된것■■■■■■■■■■■■■
 
 bs.find('div', {'id', 'a'}).find(p).find_all('div', {'class', 'className'}) == bs.select(div#a p div.className)
+select( ) : css 코드 기반으로 찾음
 
 =============================================================
 
@@ -1051,9 +1052,16 @@ getLinks('/wiki/Kevin_Bacon')
 	driver = webdriver.Chrome('~~~/chromedriver_win32/chromedriver.exe')
 	driver.get(url)
 requests : 셀레니움과 무관. 
-	html2 = requests.get(url)
-		- GET요청. chrome, explorer 등 웹 브라우저를 거치지 않고 url이라는 서버에 접근해서 url웹페이지에 대한 코드를 가져옴. 
-		- 인수로 header값 설정 가능♣(거의 필수적)
+	from bs4 import BeautifulSoup
+	import requests
+	html = requests.get(url)  	  # GET요청. chrome, explorer 등 웹 브라우저를 거치지 않고 url이라는 서버에 접근해서 html 받아옴 
+				  # 인수로 header값 설정 가능♣(거의 필수적)
+	bs = BeautifulSoup(html.text)  # html.text 넣어줘야 함
+urlopen : 셀레니움과 무관.
+	from urllib.request import urlopen
+	from bs4 import BeautifulSoup
+	html = urlopen(url)
+	bs = BeautifulSoup(html, 'html.parser') #html만 넣어줘도 됨
 
 뷰티풀솝, 셀레니움 두 개를 같이 씀. 
 

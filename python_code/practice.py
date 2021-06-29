@@ -39,10 +39,10 @@ class Crawler:
 
     def getPage(self, url): # url의 html을 파싱하기 위한 bs객체 리턴
         try:
-            req = requests.get(url)
+            req = requests.get(url) # url에 해당하는 html 코드 req에 받아서
         except requests.exceptions.RequestException:
             return None
-        return BeautifulSoup(req.text, 'html.parser')
+        return BeautifulSoup(req.text, 'html.parser') # html 코드
 
     def safeGet(self, pageObj, selector):
         """
@@ -51,7 +51,7 @@ class Crawler:
         is found for the given selector
         """
         selectedElems = pageObj.select(selector)
-        if selectedElems is not None and len(selectedElems) > 0:
+        if selectedElems is not None and len(selectedElems) > 0: # 하나 이상 찾았을 때
             return '\n'.join([elem.get_text() for elem in selectedElems])
         return ''
 
@@ -63,7 +63,7 @@ class Crawler:
         if bs is not None: # 에러나지 않았을 경우
             title = self.safeGet(bs, site.titleTag)
             body = self.safeGet(bs, site.bodyTag)
-            if title != '' and body != '':
+            if title != '' and body != '': # title, body 둘다 하나 이상의 값이 들어있으면
                 content = Content(url, title, body)
                 content.print()
           
