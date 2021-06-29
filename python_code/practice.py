@@ -1,15 +1,20 @@
 ## Crawling through sites with search
 
+# 1. 전역변수 사용해서 print되는 text들을 전역변수에 담아보기. 
+
 #ln [1] :
+
+    
+all_ = []
 
 class Content:
     """Common base class for all articles/pages"""
 
     def __init__(self, topic, url, title, body):
         self.topic = topic
+        self.url = url
         self.title = title
         self.body = body
-        self.url = url
 
     def print(self):
         """
@@ -19,6 +24,9 @@ class Content:
         print('URL: {}'.format(self.url))
         print('TITLE: {}'.format(self.title))
         print('BODY:\n{}'.format(self.body))
+        
+    def print_2(self):
+        return self.topic, self.url, self.title, self.body
 
 
 #ln [2] :
@@ -30,11 +38,11 @@ class Website:
         self.name = name # 사이트이름
         self.url = url # 사이트 도메인주소
         self.searchUrl = searchUrl # 검색창url - 활용도Good!
-        self.resultListing = resultListing
-        self.resultUrl = resultUrl
-        self.absoluteUrl = absoluteUrl
-        self.titleTag = titleTag
-        self.bodyTag = bodyTag
+        self.resultListing = resultListing # 검색 결과 나온 요소 위치 찾는 태그
+        self.resultUrl = resultUrl # 각 요소의 제목(==링크) 위치 찾는 태그
+        self.absoluteUrl = absoluteUrl # 절대주소 : True, 상대주소 : False
+        self.titleTag = titleTag # 링크 내부 title 위치 찾는 태그
+        self.bodyTag = bodyTag # 링크 내부 body 위치 찾는 태그
 
 
 #ln [3] :
@@ -62,33 +70,40 @@ class Crawler:
         Searches a given website for a given topic and records all pages found
         """
         bs = self.getPage(site.searchUrl + topic) # '검색창에 topic을 검색'한 url에 해당하는 html을 파싱하는 객체
-        searchResults = bs.select(site.resultListing) # 검색 결과 모두 찾아서 담음
+        searchResults = bs.select(site.resultListing) # 검색 결과 검색된 모든 요소에 대한 태그 모두 찾아서 담음
         for result in searchResults:
-            url = result.select(site.resultUrl)[0].attrs['href']
+            #try:
+            url = result.select_one(site.resultUrl).attrs['href']
+            # 혹시 하나의 기사 안에 같은 클래스인 여러 태그가 있을 수 있으니까 첫 번째 고름 (select만 하면 여러개 담겨서 attrs['href'] 접근 불가)
             # Check to see whether it's a relative or an absolute URL
-            if(site.absoluteUrl):
-                bs = self.getPage(url)
-            else:
-                bs = self.getPage(site.url + url)
+            if(site.absoluteUrl): # 절대주소면
+                bs = self.getPage(url) # 그대로
+            else: # 상대주소면
+                bs = self.getPage(site.url + url) # 도메인주소 뒤에 붙여 절대주소로 바꿈
             if bs is None:
                 print('Something was wrong with that page or URL. Skipping!')
                 return
             title = self.safeGet(bs, site.titleTag)
             body = self.safeGet(bs, site.bodyTag)
-            if title != '' and body != '':
+            print('===============================================')
+            
+            if title != '' and body != '': # O\'Reilly 여기서 안들어가짐!!!!
+                print('===============================================')
                 content = Content(topic, title, body, url)
                 content.print()
-
+                all_.append(content.print_2()) # 하나로 받았으므로 튜플로 받아짐
+            #except AttributeError as e:
+            #    print(e)
 
 crawler = Crawler()
 
 siteData = [
     ['O\'Reilly Media', 'http://oreilly.com', 'https://ssearch.oreilly.com/?q=',
-        'article.result', 'p.title a', True, 'h1', 'section#product-description'],
+        'article.result', 'p.title a', True, 'p[itemprop=summary]', 'div[itemprop=description]'],
     ['Reuters', 'http://reuters.com', 'http://www.reuters.com/search/news?blob=', 'div.search-result-content',
-        'h3.search-result-title a', False, 'h1', 'div.StandardArticleBody_body_1gnLA'],
+        'h3.search-result-title a', False, 'h1', 'div[class=ArticleBodyWrapper]'], # ArticleBody__content___2gQno2 paywall-article 추가
     ['Brookings', 'http://www.brookings.edu', 'https://www.brookings.edu/search/?s=',
-        'div.list-content article', 'h4.title a', True, 'h1', 'div.post-body']
+        'div.list-content article[class*=has-image]', 'h4.title a', True, 'h1.report-title', 'div.post-body.post-body-enhanced']
 ]
 sites = []
 for row in siteData:
@@ -96,7 +111,20 @@ for row in siteData:
                          row[3], row[4], row[5], row[6], row[7]))
 
 topics = ['python', 'data science']
+'''
 for topic in topics:
     print('GETTING INFO ABOUT: ' + topic)
     for targetSite in sites:
         crawler.search(topic, targetSite)
+
+for topic in topics:
+    crawler.search(topic, sites[1])
+    
+   ''' 
+    
+from urllib.request import urlopen
+from bs4 import BeautifulSoup
+html = urlopen('https://www.reuters.com/article/idUSKBN29A0BY')
+bs = BeautifulSoup(html, 'html.parser') #html만 넣어줘도 됨
+print(bs.find_all(bs.div, class_='ArticleBodyWrapper'))
+print(bs.select(bs.div[class_=ArticleBodyWrapper]))
