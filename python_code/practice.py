@@ -85,9 +85,9 @@ class Crawler:
                 return
             title = self.safeGet(bs, site.titleTag)
             body = self.safeGet(bs, site.bodyTag)
-            print('===============================================')
-            print(title, body)
-            if title != '' and body != '': # O\'Reilly 여기서 안들어가짐!!!!
+            #print('===============================================')
+            #print(title, body)
+            if title != '' and body != '': # O\'Reilly 여기서 안들어가짐!!!! => 해결o
                 print('===============================================')
                 content = Content(topic, title, body, url)
                 content.print()

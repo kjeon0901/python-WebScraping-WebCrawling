@@ -1703,9 +1703,9 @@ class Crawler:
                 return
             title = self.safeGet(bs, site.titleTag)
             body = self.safeGet(bs, site.bodyTag)
-            print('===============================================')
-            print(title, body)
-            if title != '' and body != '': # O\'Reilly 여기서 안들어가짐!!!!
+            #print('===============================================')
+            #print(title, body)
+            if title != '' and body != '': # O\'Reilly 여기서 안들어가짐!!!! => 해결o
                 print('===============================================')
                 content = Content(topic, title, body, url)
                 content.print()
@@ -1733,7 +1733,6 @@ for topic in topics:
     print('GETTING INFO ABOUT: ' + topic)
     for targetSite in sites:
         crawler.search(topic, targetSite)
-
 
 ■■■■■■■■■■■■■0630 수업中 새로 알게된것■■■■■■■■■■■■■
 
