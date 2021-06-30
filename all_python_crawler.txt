@@ -1457,7 +1457,7 @@ https://www.safaribooksonline.com/live-training/?utm_medium=content&utm_source=o
 ...
 '''
 
-============================================================
+■■■■■■■■■■■■■0629 수업中 새로 알게된것■■■■■■■■■■■■■
 
 ### * Chapter04_CrawlingModels
 
@@ -1511,7 +1511,7 @@ print('Title: {}'.format(content.title))
 print('URL: {}\n'.format(content.url))
 print(content.body)
 
-■■■■■■■■■■■■■0629 수업中 새로 알게된것■■■■■■■■■■■■■
+============================================================
 
 ln [2] :
 
@@ -1614,11 +1614,11 @@ BODY:
 Public policy and public affairs schools aim to train competent creators and implementers of government policy. While drawing on the principles that gird our economic and political systems to provide a well-rounded education, like law schools and business schools, 
 '''
 
-============================================================
+■■■■■■■■■■■■■0630 수업中 새로 알게된것■■■■■■■■■■■■■
 
 ## Crawling through sites with search
 
-# 1. 전역변수 사용해서 print되는 text들을 전역변수에 담아보기. 
+# Quiz. 전역변수 사용해서 print되는 text들을 전역변수에 담아보기. 
 
 #ln [1] :
 
@@ -1734,9 +1734,9 @@ for topic in topics:
     for targetSite in sites:
         crawler.search(topic, targetSite)
 
-■■■■■■■■■■■■■0630 수업中 새로 알게된것■■■■■■■■■■■■■
+=============================================================
 
-
+## Crawling Sites through Links
 
 
 
