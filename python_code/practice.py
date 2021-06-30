@@ -86,7 +86,7 @@ class Crawler:
             title = self.safeGet(bs, site.titleTag)
             body = self.safeGet(bs, site.bodyTag)
             print('===============================================')
-            
+            print(title, body)
             if title != '' and body != '': # O\'Reilly 여기서 안들어가짐!!!!
                 print('===============================================')
                 content = Content(topic, title, body, url)
@@ -99,11 +99,11 @@ crawler = Crawler()
 
 siteData = [
     ['O\'Reilly Media', 'http://oreilly.com', 'https://ssearch.oreilly.com/?q=',
-        'article.result', 'p.title a', True, 'p[itemprop=summary]', 'div[itemprop=description]'],
+        'article.result', 'p.title a', True, 'p[itemprop=summary], article.press-main h2', 'div[itemprop=description]'],
     ['Reuters', 'http://reuters.com', 'http://www.reuters.com/search/news?blob=', 'div.search-result-content',
-        'h3.search-result-title a', False, 'h1', 'div[class=ArticleBodyWrapper]'], # ArticleBody__content___2gQno2 paywall-article 추가
+        'h3.search-result-title a', False, 'h1', 'div.ArticleBodyWrapper, div.ArticleBody__content___2gQno2.paywall-article'],
     ['Brookings', 'http://www.brookings.edu', 'https://www.brookings.edu/search/?s=',
-        'div.list-content article[class*=has-image]', 'h4.title a', True, 'h1.report-title', 'div.post-body.post-body-enhanced']
+        'div.list-content article[class*=has-image]', 'h4.title a', True, 'h1.report-title, a.techstream--title', 'div.post-body.post-body-enhanced']
 ]
 sites = []
 for row in siteData:
@@ -111,20 +111,7 @@ for row in siteData:
                          row[3], row[4], row[5], row[6], row[7]))
 
 topics = ['python', 'data science']
-'''
 for topic in topics:
     print('GETTING INFO ABOUT: ' + topic)
     for targetSite in sites:
         crawler.search(topic, targetSite)
-
-for topic in topics:
-    crawler.search(topic, sites[1])
-    
-   ''' 
-    
-from urllib.request import urlopen
-from bs4 import BeautifulSoup
-html = urlopen('https://www.reuters.com/article/idUSKBN29A0BY')
-bs = BeautifulSoup(html, 'html.parser') #html만 넣어줘도 됨
-print(bs.find_all(bs.div, class_='ArticleBodyWrapper'))
-print(bs.select(bs.div[class_=ArticleBodyWrapper]))
