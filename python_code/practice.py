@@ -1,6 +1,6 @@
 ## Crawling Sites through Links
 
-# Quiz. business 섹션의 기사들만 print
+# Quiz. Main Page에서 business 섹션의 기사들만 print
 
 import requests
 from bs4 import BeautifulSoup
