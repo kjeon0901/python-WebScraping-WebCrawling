@@ -62,9 +62,8 @@ for download in downloadList:
     fileUrl = getAbsoluteURL(baseUrl, download['src']) # getAbsoluteURL( ) 메소드 : 서버 상에 저장된 이미지 파일 경로가 담김
     print('fileUrl',fileUrl)
     if fileUrl is not None: # 존재하면
-        urlretrieve(fileUrl, getDownloadPath(baseUrl, fileUrl, downloadDirectory))
-        
-'''
+        urlretrieve(fileUrl, getDownloadPath(baseUrl, fileUrl, downloadDirectory))    
+        '''
         어떤 파일을 fileUrl에서 다운받아주세요. 
         그리고 현재 작업 경로에서 'downloaded'라는 폴더를 만들고, 폴더 안에서 fireUrl 상대 경로와 똑같은 경로에 그 파일을 저장해주세요. 
         '''
