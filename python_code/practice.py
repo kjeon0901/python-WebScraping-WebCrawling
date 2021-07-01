@@ -1,6 +1,6 @@
 ## Crawling Sites through Links
 
-# Quiz. Main Page에서 business 섹션의 기사들만 print
+# Quiz. Main Page에서 business, technology 섹션의 기사들만 print
 
 import requests
 from bs4 import BeautifulSoup
@@ -78,6 +78,6 @@ class Crawler:
                 self.parse(targetPage) # parse( ) 메소드
 
 
-reuters = Website('Reuters', 'https://www.reuters.com', '^(/article/)', False, 'h1', 'div.StandardArticleBody_body_1gnLA') # Website 객체
+reuters = Website('Reuters', 'https://www.reuters.com', '^(/business/)|(/technology/)', False, 'h1', 'div.StandardArticleBody_body_1gnLA') # Website 객체
 crawler = Crawler(reuters) # reuters 를 크롤링하기 위한 Crawler 객체
 crawler.crawl()
