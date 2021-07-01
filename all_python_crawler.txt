@@ -1872,4 +1872,32 @@ class ArticleSpider(scrapy.Spider):
 # jupyter wikiSpider에 기존에 있던 article.py 안에 있는 내용만 내가 만든 article.py에 복붙. 
 # Anaconda Prompt에서 실행하면 URL is: ~~~ Title is: ~~~ 출력된 거 보임. 
 
+==============================================================
+
+### * Chapter06_StoringData
+
+# ln [] :
+    
+from urllib.request import urlretrieve # 우리가 저장하고자 하는 파일을 저장하고자 하는 디렉토리에 저장해주는 함수
+from urllib.request import urlopen
+from bs4 import BeautifulSoup
+
+html = urlopen('http://www.pythonscraping.com')
+bs = BeautifulSoup(html, 'html.parser')
+imageLocation = bs.find('a', {'id': 'logo'}).find('img')['src'] # id가 logo인 a태그에서 img태그를 찾는데, 그 img태그에서 src라는 속성의 value값(.jpg로 끝나는 이미지 경로)을 담음
+urlretrieve (imageLocation, 'logo.jpg') # 현재 내가 작업하고 있는 파일의 경로에 logo.jpg로 해당 img 저장됨. 
+                                        # 'logo.jpg' 앞에 경로를 써 줘서 특정 경로에 저장할 수도 있음. 
+
+
+# ln [1] :
+
+
+
+
+
+
+
+
+
+
 ■■■■■■■■■■■■■0702 수업中 새로 알게된것■■■■■■■■■■■■■

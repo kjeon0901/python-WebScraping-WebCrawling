@@ -1,83 +1,46 @@
-## Crawling Sites through Links
-
-# Quiz. Main Page에서 business, technology 섹션의 기사들만 print
-
-import requests
+import os # 내 컴퓨터 안의 경로로 이동한다거나, 폴더를 만든다거나 하는 행위 가능
+from urllib.request import urlretrieve
+from urllib.request import urlopen
 from bs4 import BeautifulSoup
 
-#ln [1] :
+downloadDirectory = 'downloaded'
+baseUrl = 'http://pythonscraping.com' # 도메인주소이자, 우리가 scraping할 웹페이지
 
-class Website:
+def getAbsoluteURL(baseUrl, source):
+    if source.startswith('http://www.'): # startswith('str') : source를 전부 string의 관점에서 봤을 때, string이 'str'로 시작하는가?
+        url = 'http://{}'.format(source[11:])
+    elif source.startswith('http://'):
+        url = source
+    elif source.startswith('www.'):
+        url = 'http://{}'.format(source[4:])
+    else: # source가 상대경로라면
+        url = '{}/{}'.format(baseUrl, source) # 도메인주소와 합쳐줌
+    if baseUrl not in url:
+        return None
+    return url # 결과적으로, 전부 http://로 시작하고 www.는 없는 꼴로 바꿔줌
 
-    def __init__(self, name, url, targetPattern, absoluteUrl, titleTag, bodyTag):
-        self.name = name # 사이트 이름
-        self.url = url # 사이트 도메인 주소
-        self.targetPattern = targetPattern # 찾아야 하는 href 패턴 (정규표현식)
-        self.absoluteUrl = absoluteUrl # 절대주소 : True, 상대주소 : False
-        self.titleTag = titleTag # 링크 내부 title 위치 찾는 태그
-        self.bodyTag = bodyTag # 링크 내부 body 위치 찾는 태그
+def getDownloadPath(baseUrl, absoluteUrl, downloadDirectory):
+    path = absoluteUrl.replace('www.', '') # 아까 getAbsoluteURL( )에서 이미 다 없애줬기 때문에 의미 없는 코드임
+    path = path.replace(baseUrl, '') # 도메인주소 포함되어 있으면 없애줌 (내 컴퓨터의 디렉토리에 저장해야 하니까) => "상대경로만 남음!!"
+    path = downloadDirectory+path # 'downloaded' + 상대경로 => 저장 경로 완성
+    directory = os.path.dirname(path) # path에서 directory만 담음
 
+    if not os.path.exists(directory): # directory(폴더)가 존재하지 않으면
+        os.makedirs(directory) # directory(폴더) 새로 만들어줌
 
-class Content:
+    return path
 
-    def __init__(self, url, title, body):
-        self.url = url
-        self.title = title
-        self.body = body
+html = urlopen('http://www.pythonscraping.com')
+bs = BeautifulSoup(html, 'html.parser')
+downloadList = bs.findAll(src=True) # src라는 속성값을 가지고 있는 모든 태그    // script에서 쓰인 건 제외되니까, 총 3개의 img파일만 담김
 
-    def print(self):
-        print('URL: {}'.format(self.url))
-        print('TITLE: {}'.format(self.title))
-        print('BODY:\n{}'.format(self.body))
+for download in downloadList:
+    fileUrl = getAbsoluteURL(baseUrl, download['src']) # getAbsoluteURL( ) 메소드 : 서버 상에 저장된 이미지 파일 경로가 담김
+    if fileUrl is not None: # 존재하면
+        print(fileUrl)
 
-
-#ln [2] :
-
-import re
-
-
-class Crawler:
-    def __init__(self, site):
-        self.site = site
-        self.visited = []
-
-    def getPage(self, url):
-        try:
-            req = requests.get(url) # url에 해당하는 html 가져옴
-        except requests.exceptions.RequestException:
-            return None # 에러나면 None 리턴
-        return BeautifulSoup(req.text, 'html.parser') # 그 html을 파싱하기 위한 bs 객체 리턴
-
-    def safeGet(self, pageObj, selector):
-        selectedElems = pageObj.select(selector) 
-        if selectedElems is not None and len(selectedElems) > 0: # 하나 이상인 경우
-            return '\n'.join([elem.get_text() for elem in selectedElems]) # 각 요소의 text 뽑고, 그 요소 사이사이에 '\n'을 넣어 하나의 큰 문자열로 만듦
-        return '' # 아무것도 못 찾은 경우
-
-    def parse(self, url):
-        bs = self.getPage(url) # 새로운 url에 해당하는 getPage( ) 메소드
-        if bs is not None: # bs 잘 받아왔으면
-            title = self.safeGet(bs, self.site.titleTag) # safeGet( ) 메소드
-            body = self.safeGet(bs, self.site.bodyTag) # safeGet( ) 메소드
-            if title != '' and body != '': # title, body 둘다 잘 가져왔을 때만
-                content = Content(url, title, body)
-                content.print() # 출력
-
-    def crawl(self):
-        """
-        Get pages from website home page
-        """
-        bs = self.getPage(self.site.url) # 도메인주소에 해당하는 getPage( ) 메소드
-        targetPages = bs.findAll('a', href=re.compile(self.site.targetPattern)) # 현재 html에서 href가 targetPattern인 a태그 모두 찾기
-        for targetPage in targetPages: # targetPage(a태그들) 하나씩
-            targetPage = targetPage.attrs['href'] # targetPage에 a태그 대신 href 속성의 value값 넣어줌
-            if targetPage not in self.visited: # 방문한 적 없으면
-                self.visited.append(targetPage) # 방문기록 history에 넣어줌
-                if not self.site.absoluteUrl: # 절대주소가 아니라면 (지금 모두 /article/로 시작하는 상대주소인 상황)
-                    targetPage = '{}{}'.format(self.site.url, targetPage) # 절대주소로 바꿈
-                self.parse(targetPage) # parse( ) 메소드
-
-
-reuters = Website('Reuters', 'https://www.reuters.com', '^(/business/)|(/technology/)', False, 'h1', 'div.StandardArticleBody_body_1gnLA') # Website 객체
-crawler = Crawler(reuters) # reuters 를 크롤링하기 위한 Crawler 객체
-crawler.crawl()
+urlretrieve(fileUrl, getDownloadPath(baseUrl, fileUrl, downloadDirectory))
+'''
+어떤 파일을 fileUrl에서 다운받아주세요. 
+그리고 현재 작업 경로에서 'downloaded'라는 폴더를 만들고, 폴더 안에서 fireUrl 상대 경로와 똑같은 경로에 그 파일을 저장해주세요. 
+'''
