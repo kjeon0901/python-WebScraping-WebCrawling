@@ -1920,8 +1920,10 @@ def getAbsoluteURL(baseUrl, source):
         url = '{}/{}'.format(baseUrl, source) # 도메인주소와 합쳐줌
         print(6)
     '''
-    if baseUrl not in url: # 외부 링크인 https://covers.oreillystatic.com/images/0636920078067/lrg.jpg 가 여기로 빠짐. 해결해야 함. 
+    if baseUrl not in url: 
         return None
+    # 외부 링크인 https://covers.oreillystatic.com/images/0636920078067/lrg.jpg 가 여기로 빠져서 계속 None으로 들어갔음.
+    # 뒤에서 처리해줄 거니까 코드 없애서 해결함. 
     '''
     print(url)
     return url # 결과적으로, 전부 http://로 시작하고 www.는 없는 꼴로 바꿔줌
@@ -1931,7 +1933,7 @@ def getDownloadPath(baseUrl, absoluteUrl, downloadDirectory):
     path = path.replace(baseUrl, '') # 도메인주소 포함되어 있으면 없애줌 (내 컴퓨터의 디렉토리에 저장해야 하니까) => "상대경로만 남음!!"
     
     print('path',path)
-    external = re.compile('.*\.com').search(path) # 외부 도메인주소가 들어가 있으면 없애줌. 자꾸 None 들어감
+    external = re.compile('.*\.com').search(path) # 외부 도메인주소가 들어가 있으면 없애줌. None 들어가던 것 해결함. 
     if external != None:
         path = path.replace(external.group(), '')
     '''
@@ -1962,3 +1964,4 @@ for download in downloadList:
         '''
 
 ■■■■■■■■■■■■■0702 수업中 새로 알게된것■■■■■■■■■■■■■
+
