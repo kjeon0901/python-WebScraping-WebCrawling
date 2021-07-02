@@ -1969,13 +1969,16 @@ for download in downloadList:
 MySQL	- 세미콜론(;) 써야 하나의 명령문 끝남
 	- 대문자가 명령어
 
-mysql> CREATE DATABASE scraping;		스크래핑 만듦
+
+mysql> CREATE DATABASE scraping;			// 스크래핑 만듦
 Query OK, 1 row affected (0.12 sec)
 
-mysql> USE scraping;			스크래핑 사용하기 위해 안으로 들어옴
+
+mysql> USE scraping;				// 스크래핑 사용하기 위해 안으로 들어옴
 Database changed
 
-mysql> CREATE TABLE pages(		데이터 저장할 수 있는 테이블 만듦 (생성할 때 1column 이상 담아야 함)
+
+mysql> CREATE TABLE pages(			// 데이터 저장할 수 있는 테이블 만듦 (생성할 때 1column 이상 담아야 함)
       -> id BIGINT(7) NOT NULL AUTO_INCREMENT,
       -> title VARCHAR(200),
       -> content VARCHAR(10000),
@@ -1983,7 +1986,8 @@ mysql> CREATE TABLE pages(		데이터 저장할 수 있는 테이블 만듦 (생
       ->	);
 Query OK, 0 rows affected, 1 warning (1.23 sec)
 
-mysql> DESCRIBE pages;
+
+mysql> DESCRIBE pages;				// 테이블 열어보기
 +---------+----------------+------+-----+-------------------------+-----------------------+
 | Field	 | Type             | Null  | Key  | Default          	         | Extra               	  |
 +---------+----------------+------+-----+-------------------------+-----------------------+
@@ -1992,9 +1996,96 @@ mysql> DESCRIBE pages;
 | content	 | varchar(10000) | YES   |       | NULL           	         |         		  |
 | created	 | timestamp      | YES   |       | CURRENT_TIMESTAMP | DEFAULT_GENERATED |
 +---------+----------------+------+-----+-------------------------+-----------------------+
-4 rows in set (0.10 sec)
+4 rows in set (0.10 sec)				// id가 auto_increment : 안 정해주면 1부터 자동 설정됨, timestamp : 추가한 시간으로 자동 설정됨
 
 
+mysql> INSERT INTO pages(title, content)		// pages의 title, content 필드에 입력하겠다. 
+    -> VALUES(					// 입력할 value값은 각각 이것이다. 
+    -> "test page title", 
+    -> "this is some test page content. It can be up to 10.000 characters long."
+    -> );
+Query OK, 1 row affected (0.08 sec)
+
+
+mysql> INSERT INTO pages(id, title, content, created)
+    -> VALUES(
+    -> 3,
+    -> "test page title",
+    -> "This is some test page content. It can be up to 10,100 characters long.",
+    -> "2021-07-21 11:49:00"
+    -> );
+Query OK, 1 row affected (0.39 sec)
+
+
+mysql> SELECT * FROM pages WHERE id = 2;		// pages 테이블에서 id=2인 row 하나 가져옴
+Empty set (0.00 sec)				// 지금 id=2 설정된 게 없으므로 비어있다고 나옴. 
+
+
+mysql> SELECT * FROM pages WHERE id = 1;		// 처음에 id 안 정해줬으니까 자동으로 1로 정해져있음. 
++----+-----------------+----------------------------------------------------------------------------+-----------------------+
+| id   | title               | content                                                                                | created                 |
++----+-----------------+----------------------------------------------------------------------------+-----------------------+
+|  1   | test page title  | this is some test page content. It can be up to 10.000 characters long. | 2021-07-02 11:45:01 |
++----+-----------------+----------------------------------------------------------------------------+-----------------------+
+1 row in set (0.00 sec)
+
+
+mysql> SELECT * FROM pages WHERE id = 3;		// 두 번째에 id 3으로 정해줬으니까 출력됨. 
++----+-----------------+-----------------------------------------------------------------------------+-----------------------+
+| id   | title               | content                                                                                 | created                 |
++----+-----------------+-----------------------------------------------------------------------------+-----------------------+
+|  3   | test page title  | This is some test page content. It can be up to 10,100 characters long. | 2021-07-21 11:49:00 |
++----+-----------------+-----------------------------------------------------------------------------+-----------------------+
+1 row in set (0.00 sec)
+
+
+mysql> SELECT * FROM pages WHERE title LIKE "%test%";	
+						// title에 test가 들어 있는 row 모두 출력됨. 
++----+-----------------+-------------------------------------------------------------------------+---------------------+
+| id | title           | content                                                                 | created             |
++----+-----------------+-------------------------------------------------------------------------+---------------------+
+|  1 | test page title | this is some test page content. It can be up to 10.000 characters long. | 2021-07-02 11:45:01 |
+|  3 | test page title | This is some test page content. It can be up to 10,100 characters long. | 2021-07-21 11:49:00 |
++----+-----------------+-------------------------------------------------------------------------+---------------------+
+2 rows in set (0.01 sec)
+
+
+mysql> SELECT id, title FROM pages WHERE content LIKE "%page content%";
+						// content에 'page content'가 들어 있는 row 각각 id, title column만 출력
++----+-----------------+
+| id   | title               |
++----+-----------------+
+|  1   | test page title  |
+|  3   | test page title  |
++----+-----------------+
+2 rows in set (0.00 sec)
+
+
+mysql> DELETE FROM pages WHERE id = 1;		// id=1인 row 삭제
+Query OK, 1 row affected (0.05 sec)
+
+
+mysql> SELECT * FROM pages WHERE id = 1;		// 삭제됐으므로 비어있다고 나옴.
+Empty set (0.02 sec)
+
+
+mysql> UPDATE pages SET title="A nes title", content="Some new content" WHERE id=3;
+						// id=3인 row의 title, content를 각각 수정
+Query OK, 1 row affected (0.06 sec)
+Rows matched: 1  Changed: 1  Warnings: 0
+
+
+mysql> SELECT * FROM pages WHERE title LIKE "%title%"; // 수정된 것 확인
++----+-------------+---------------------+-----------------------+
+| id   | title           | content               | created                 |
++----+-------------+---------------------+-----------------------+
+|  3   | A nes title   | Some new content | 2021-07-21 11:49:00 |
++----+-------------+---------------------+-----------------------+
+1 row in set (0.00 sec)
+
+=============================================================
+
+MySQL PYTHON 연동
 
 ■■■■■■■■■■■■■0705 수업中 새로 알게된것■■■■■■■■■■■■■
 ■■■■■■■■■■■■■0706 수업中 새로 알게된것■■■■■■■■■■■■■

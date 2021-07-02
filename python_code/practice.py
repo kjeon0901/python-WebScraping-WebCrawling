@@ -1,47 +1,35 @@
-import os
-from urllib.request import urlretrieve
 from urllib.request import urlopen
 from bs4 import BeautifulSoup
+import datetime
+import random
+import pymysql
 import re
 
-downloadDirectory = 'downloaded'
-baseUrl = 'http://pythonscraping.com'
+conn = pymysql.connect(host='127.0.0.1',
+                       user='root', passwd='root', db='mysql', charset='utf8')
+cur = conn.cursor()
+cur.execute('USE scraping')
 
-def getAbsoluteURL(baseUrl, source):
-    if source.startswith('http://www.'):
-        url = 'http://{}'.format(source[11:])
-    elif source.startswith('https://www.'):
-        url = 'http://{}'.format(source[12:])
-    elif source.startswith('http://'):
-        url = source
-    elif source.startswith('https://'):
-        url = 'http://{}'.format(source[8:])
-    elif source.startswith('www.'):
-        url = 'http://{}'.format(source[4:])
-    else:
-        url = '{}/{}'.format(baseUrl, source) 
-    return url 
+random.seed(datetime.datetime.now())
 
-def getDownloadPath(baseUrl, absoluteUrl, downloadDirectory):
-    path = absoluteUrl.replace('www.', '')
-    path = path.replace(baseUrl, '') 
-    external = re.compile('.*\.com').search(path) 
-    if external != None:
-        path = path.replace(external.group(), '')
-    path = downloadDirectory+path 
-    directory = os.path.dirname(path) 
+def store(title, content):
+    cur.execute('INSERT INTO pages (title, content) VALUES ("%s", "%s")', (title, content))
+    cur.connection.commit()
 
-    if not os.path.exists(directory):
-        os.makedirs(directory)
-    print(path)
-    return path
+def getLinks(articleUrl):
+    html = urlopen('http://en.wikipedia.org'+articleUrl)
+    bs = BeautifulSoup(html, 'html.parser')
+    title = bs.find('h1').get_text()
+    content = bs.find('div', {'id':'mw-content-text'}).find('p').get_text()
+    store(title, content)
+    return bs.find('div', {'id':'bodyContent'}).findAll('a', href=re.compile('^(/wiki/)((?!:).)*$'))
 
-html = urlopen('http://www.pythonscraping.com')
-bs = BeautifulSoup(html, 'html.parser')
-downloadList = bs.body.findAll(src=True)
-
-for download in downloadList:
-    fileUrl = getAbsoluteURL(baseUrl, download['src']) 
-    if fileUrl is not None:
-        print(fileUrl)
-        urlretrieve(fileUrl, getDownloadPath(baseUrl, fileUrl, downloadDirectory))    
+links = getLinks('/wiki/Kevin_Bacon')
+try:
+    while len(links) > 0:
+         newArticle = links[random.randint(0, len(links)-1)].attrs['href']
+         print(newArticle)
+         links = getLinks(newArticle)
+finally:
+    cur.close()
+    conn.close()
