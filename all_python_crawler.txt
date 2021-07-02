@@ -31,6 +31,7 @@ txt파일만을 긁어오는 건 별 문제 안 생김. but 이미지파일, 영
 	하드웨어 cpu(두뇌 역할의 칩)
 윈도우는 패키지마다 가격 붙어서 제품 찍어낼 때도 윈도우 카피 깔면 원재료비가 확 오르지만, 리눅스는 오픈소스+퍼포먼스better라서 리눅스로도 개발 多
 	 => 리눅스 제대로 다룰 줄 알면 회사에서 할 일 多. 서버 다루는 백엔드, 임베디드도 결국 다 리눅스임!!
+mysql 무료 다운로드 https://dev.mysql.com/downloads/windows/installer/
 
 ■■■■■■■■■■■■■0617 수업中 새로 알게된것■■■■■■■■■■■■■
 
@@ -1964,4 +1965,37 @@ for download in downloadList:
         '''
 
 ■■■■■■■■■■■■■0702 수업中 새로 알게된것■■■■■■■■■■■■■
+
+MySQL	- 세미콜론(;) 써야 하나의 명령문 끝남
+	- 대문자가 명령어
+
+mysql> CREATE DATABASE scraping;		스크래핑 만듦
+Query OK, 1 row affected (0.12 sec)
+
+mysql> USE scraping;			스크래핑 사용하기 위해 안으로 들어옴
+Database changed
+
+mysql> CREATE TABLE pages(		데이터 저장할 수 있는 테이블 만듦 (생성할 때 1column 이상 담아야 함)
+      -> id BIGINT(7) NOT NULL AUTO_INCREMENT,
+      -> title VARCHAR(200),
+      -> content VARCHAR(10000),
+      -> created TIMESTAMP DEFAULT CURRENT_TIMESTAMP, PRIMARY KEY(id)
+      ->	);
+Query OK, 0 rows affected, 1 warning (1.23 sec)
+
+mysql> DESCRIBE pages;
++---------+----------------+------+-----+-------------------------+-----------------------+
+| Field	 | Type             | Null  | Key  | Default          	         | Extra               	  |
++---------+----------------+------+-----+-------------------------+-----------------------+
+| id	 | bigint  	          | NO   | PRI  | NULL          	         | auto_increment    	  |
+| title	 | varchar(200)    | YES   |       | NULL           	         |                   	  |
+| content	 | varchar(10000) | YES   |       | NULL           	         |         		  |
+| created	 | timestamp      | YES   |       | CURRENT_TIMESTAMP | DEFAULT_GENERATED |
++---------+----------------+------+-----+-------------------------+-----------------------+
+4 rows in set (0.10 sec)
+
+
+
+■■■■■■■■■■■■■0705 수업中 새로 알게된것■■■■■■■■■■■■■
+■■■■■■■■■■■■■0706 수업中 새로 알게된것■■■■■■■■■■■■■
 
