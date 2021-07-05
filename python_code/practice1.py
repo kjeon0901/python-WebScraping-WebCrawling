@@ -10,7 +10,7 @@ bs = BeautifulSoup(html, 'html.parser')
 table = bs.findAll('table',{'class':'wikitable'})[0]
 rows = table.findAll('tr')
 
-csvFile = open('editors.csv', 'wt+')
+csvFile = open('editors.csv', 'wt+', encoding='UTF-8') # 인코딩 방식 때문에 에러나는 것 해결 위해 encoding='UTF-8' 추가
 writer = csv.writer(csvFile)
 try:
     for row in rows:
