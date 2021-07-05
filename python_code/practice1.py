@@ -57,5 +57,12 @@ def getLinks(pageUrl, recursionLevel, pages): # pageUrl : 현재 웹페이지 �
         
         
 getLinks('/wiki/Kevin_Bacon', 0, loadPages()) 
+'''
+PAGE HAS NO LINKS: /wiki/Philadelphia,_Pennsylvania
+PAGE HAS NO LINKS: /wiki/Philly_(disambiguation)
+PAGE HAS NO LINKS: /wiki/Philadelphia
+PAGE HAS NO LINKS: /wiki/Philadelphia_(disambiguation)
+PAGE HAS NO LINKS: /wiki/Philadelphia_County,_Pennsylvania
+'''
 cur.close()
 conn.close()

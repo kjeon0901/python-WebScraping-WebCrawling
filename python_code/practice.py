@@ -6,7 +6,7 @@ import pymysql # 파이썬과 MySQL 연동 => 서로 데이터 주고받을 수 
 import re
 
 conn = pymysql.connect(host='127.0.0.1',
-                       user='root', passwd='KJEON0901Q1W2E3R4', db='mysql', charset='utf8')
+                       user='root', passwd='!!!!!!!!', db='mysql', charset='utf8') # passwd에 내 mysql 비밀번호 넣기
 cur = conn.cursor() # 파이썬에서 긁어온 데이터를 MySQL 데이터베이스로 넘겨주기 위한 객체
 cur.execute('USE scraping') # USE scraping : mysql에서 쓰는 쿼리문. scraping 사용하기 위해 mysql로 들어가는 쿼리문. 
 
