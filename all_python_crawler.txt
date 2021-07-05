@@ -32,6 +32,7 @@ txt파일만을 긁어오는 건 별 문제 안 생김. but 이미지파일, 영
 윈도우는 패키지마다 가격 붙어서 제품 찍어낼 때도 윈도우 카피 깔면 원재료비가 확 오르지만, 리눅스는 오픈소스+퍼포먼스better라서 리눅스로도 개발 多
 	 => 리눅스 제대로 다룰 줄 알면 회사에서 할 일 多. 서버 다루는 백엔드, 임베디드도 결국 다 리눅스임!!
 mysql 무료 다운로드 https://dev.mysql.com/downloads/windows/installer/
+mysql workbench 쓰면 편함. mysql 설치할 때 설정해줘야 함!
 
 ■■■■■■■■■■■■■0617 수업中 새로 알게된것■■■■■■■■■■■■■
 
@@ -2136,6 +2137,7 @@ mysql> SELECT * FROM pages WHERE id = 6;
 +----+----------------+---------+-----------------------+
 1 row in set (0.01 sec)
 
+
 mysql> SELECT * FROM pages WHERE id = 23;
 +----+-------------------+---------+-----------------------+
 | id   | title                  | content | created                 |
@@ -2187,6 +2189,55 @@ finally: # 예외처리 try-except-finally : try문 수행 도중 예외가 발�
     csvFile.close()
 
 ============================================================
+============================================================
+
+mysql> CREATE DATABASE wikipedia;
+Query OK, 1 row affected (0.16 sec)
+
+
+mysql> USE wikipedia
+Database changed
+
+
+mysql> CREATE TABLE pages(			// pages라는 첫 번째 테이블 생성
+    -> id INT NOT NULL AUTO_INCREMENT,
+    -> url VARCHAR(255) NOT NULL,
+    -> created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    -> PRIMARY KEY(id)
+    -> );
+Query OK, 0 rows affected (0.71 sec)
+
+
+mysql> CREATE TABLE links(				// links라는 두 번째 테이블 생성
+    -> id INT NOT NULL AUTO_INCREMENT,
+    -> fromPageId INT NULL,
+    -> toPageId INT NULL,
+    -> created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    -> PRIMARY KEY(id)
+    -> );
+Query OK, 0 rows affected (0.40 sec)
+
+
+mysql> TRUNCATE pages;				// pages 테이블 내용만 전체 삭제
+Query OK, 0 rows affected (0.78 sec)
+
+
+mysql> DESCRIBE pages;				// 그렇다고 테이블 자체가 사라진 건 아님
++---------+--------------+------+-----+-------------------------+------------------------+
+| Field     | Type           | Null  | Key  | Default                    | Extra                       |
++---------+--------------+------+-----+-------------------------+------------------------+
+| id         | int             | NO   | PRI   | NULL                      | auto_increment          |
+| url        | varchar(255) | NO   |        | NULL                      |                              |
+| created  | timestamp   | NO   |        | CURRENT_TIMESTAMP | DEFAULT_GENERATED  |
++---------+--------------+------+-----+-------------------------+------------------------+
+3 rows in set (0.06 sec)
+
+
+
+
+
+
+
 
 
 
