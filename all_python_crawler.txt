@@ -2260,7 +2260,7 @@ cur.execute('USE wikipedia') # sql문을 실행(execute), execute : 파이썬에
 def insertPageIfNotExists(url):
     cur.execute('SELECT * FROM pages WHERE url = %s', (url)) # pages 테이블에서 해당 url을 가진 모든 row 가져옴
     if cur.rowcount == 0: # 하나도 없으면 (DB가 파이썬 변수 rowcount에 0을 담아줌)
-        cur.execute('INSERT INTO pages (url) VALUES (%s)', (url)) # pages 테이블에 해당 url을 가진 새로운 추가
+        cur.execute('INSERT INTO pages (url) VALUES (%s)', (url)) # pages 테이블에 해당 url을 가진 새로운 row 추가
         conn.commit() # 실제로 데이터베이스에 써줌
         
         test = cur.lastrowid
@@ -2323,16 +2323,23 @@ def getLinks(pageUrl, recursionLevel, pages): # pageUrl : 현재 웹페이지 �
                                      # 재귀로 인해 그 페이지로 다시 들어가서 무한 루프로 빠지면 안 되기 때문에 if문 못 들어오도록 걸러줌.
             print("PAGE HAS NO LINKS: {}".format(link))
             pages.append(link) # pages 테이블에 담긴 모든 url 담은 리스트에 link도 추가
-            getLinks(link, recursionLevel+1, pages) # 재귀→계속 첫 번째 내부링크로만 들어감
+            getLinks(link, recursionLevel+1, pages) # 재귀
         
         
 getLinks('/wiki/Kevin_Bacon', 0, loadPages()) # 처음엔 loadPages() : []
 '''
-PAGE HAS NO LINKS: /wiki/Philadelphia,_Pennsylvania
-PAGE HAS NO LINKS: /wiki/Philly_(disambiguation)
-PAGE HAS NO LINKS: /wiki/Philadelphia
-PAGE HAS NO LINKS: /wiki/Philadelphia_(disambiguation)
-PAGE HAS NO LINKS: /wiki/Philadelphia_County,_Pennsylvania
+lastrowid: 1
+lastrowid: 2
+PAGE HAS NO LINKS: /wiki/Kevin_Bacon_(disambiguation)
+fetchone()[0]: 2
+fetchone()[0]: 1
+lastrowid: 3
+PAGE HAS NO LINKS: /wiki/Kevin_Bacon_(producer)
+fetchone()[0]: 3
+lastrowid: 4
+PAGE HAS NO LINKS: /wiki/Rotherham
+fetchone()[0]: 4
+···
 '''
 cur.close()
 conn.close()
@@ -2378,14 +2385,11 @@ mysql> SELECT * FROM links;
 +----+------------+----------+---------------------+
 11 rows in set (0.00 sec)
 
-
-
-
-
-
 ■■■■■■■■■■■■■0706 수업中 새로 알게된것■■■■■■■■■■■■■
 
-## 
+## quiz 1. pages 테이블 안에 해당 페이지의 본문 or 제목(본문이 없는 경우)을 담은 content라는 컬럼 추가
+
+## 우선 MySQL에서 테이블 먼저 바꿔줌
 
 mysql> ALTER TABLE pages ADD content TEXT;		// pages 테이블에 TEXT 데이터 타입의 content 필드 추가
 Query OK, 0 rows affected (0.74 sec)
@@ -2425,6 +2429,115 @@ mysql> DESC pages;
 mysql> INSERT INTO pages (url) VALUES ("/wiki/");		// 이제 content 없이 url만 넣어주면 에러 뜸. GOOD~!
 ERROR 1364 (HY000): Field 'content' doesn't have a default value
 
+=============================================================
+
+from urllib.request import urlopen
+from bs4 import BeautifulSoup
+import re
+import pymysql # 파이썬과 DB를 연결시켜주는 패키지
+from random import shuffle
+
+conn = pymysql.connect(host='127.0.0.1',
+                       user='root', passwd='!!!!!!!!', db='mysql', charset='utf8')
+cur = conn.cursor() 
+cur.execute('USE wikipedia')
+
+def insertPageIfNotExists(url):
+    cur.execute('SELECT * FROM pages WHERE url = %s', (url)) # pages 테이블에서 해당 url을 가진 모든 row 가져옴
+    if cur.rowcount == 0: # 하나도 없으면
+        html = urlopen('http://en.wikipedia.org{}'.format(url))
+        bs = BeautifulSoup(html, 'html.parser')
+        #### 추가 / 수정된 부분 ####
+        content = bs.find('div', {'class': 'mw-parser-output'}).find('p', {'class': None}).get_text()
+        if content==None:
+            content = bs.find('h1').get_text()
+        cur.execute('INSERT INTO pages (url, content) VALUES (%s, %s)', (url, content)) # pages 테이블에 해당 url, content을 가진 새로운 row 추가
+        ###########################
+        conn.commit() 
+        test = cur.lastrowid
+        print('lastrowid:', test) 
+        return test 
+    else: # 있으면
+        test1 = cur.fetchone()[0]
+        print('fetchone()[0]:', test1) 
+        return test1 
+def loadPages():
+    cur.execute('SELECT * FROM pages')
+    pages = [row[1] for row in cur.fetchall()] # pages에 담긴 모든 row에 대해 url 가져와서 리스트에 담음
+    return pages
+
+def insertLink(fromPageId, toPageId):
+    cur.execute('SELECT * FROM links WHERE fromPageId = %s AND toPageId = %s', 
+                  (int(fromPageId), int(toPageId))) 
+    if cur.rowcount == 0: # 하나도 없으면
+        cur.execute('INSERT INTO links (fromPageId, toPageId) VALUES (%s, %s)', 
+                    (int(fromPageId), int(toPageId)))
+        conn.commit()
+def pageHasLinks(pageId):
+    cur.execute('SELECT * FROM links WHERE fromPageId = %s', (int(pageId))) 
+    rowcount = cur.rowcount
+    if rowcount == 0: # 하나도 없으면
+        return False
+    return True # 하나라도 있으면
+
+def getLinks(pageUrl, recursionLevel, pages): 
+    if recursionLevel > 4:
+        return
+
+    pageId = insertPageIfNotExists(pageUrl) 
+    html = urlopen('http://en.wikipedia.org{}'.format(pageUrl))
+    bs = BeautifulSoup(html, 'html.parser') 
+    links = bs.findAll('a', href=re.compile('^(/wiki/)((?!:).)*$'))
+    links = [link.attrs['href'] for link in links] 
+
+    for link in links: # link(href 속성값) 하나씩
+        linkId = insertPageIfNotExists(link) 
+        insertLink(pageId, linkId) 
+        if not pageHasLinks(linkId): 
+            print("PAGE HAS NO LINKS: {}".format(link))
+            pages.append(link) 
+            getLinks(link, recursionLevel+1, pages) 
+        
+getLinks('/wiki/Kevin_Bacon', 0, loadPages()) # 처음엔 loadPages() : []
+'''
+lastrowid: 1
+lastrowid: 2
+PAGE HAS NO LINKS: /wiki/Kevin_Bacon_(disambiguation)
+fetchone()[0]: 2
+fetchone()[0]: 1
+lastrowid: 3
+PAGE HAS NO LINKS: /wiki/Kevin_Bacon_(producer)
+fetchone()[0]: 3
+lastrowid: 4
+PAGE HAS NO LINKS: /wiki/Rotherham
+fetchone()[0]: 4
+···
+'''
+cur.close()
+conn.close()
+
+=============================================================
+
+mysql> SELECT * FROM pages WHERE id < 5;
++----+------------------------------------+---------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| id | url                                | created             | content                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
++----+------------------------------------+---------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+|  1 | /wiki/Kevin_Bacon                  | 2021-07-07 09:48:49 | Kevin Norwood Bacon[2] (born July 8, 1958)[3] is an American actor. His films include the musical-drama film Footloose (1984), the controversial historical conspiracy legal thriller JFK (1991), the legal drama A Few Good Men (1992), the historical docudrama Apollo 13 (1995), and the mystery drama Mystic River (2003). Bacon is also known for voicing the title character in Balto (1995), and was taking on darker roles, such as that of a sadistic guard in Sleepers (1996), and troubled former child abuser in The Woodsman (2004). He is further known for the hit comedies National Lampoon's Animal House (1978), Diner (1982), Tremors (1990) and Crazy, Stupid, Love (2011). His other well-known films are Friday the 13th (1980), Flatliners (1990), The River Wild (1994), Wild Things (1998), Stir of Echoes (1999), Hollow Man (2000), Frost/Nixon (2008), X-Men: First Class (2011), Black Mass (2015) and Patriots Day (2016). He is equally prolific on television, having starred in the Fox drama series The Following (2013?2015). For the HBO original film Taking Chance (2009), Bacon won a Golden Globe Award and a Screen Actors Guild Award, also receiving a Primetime Emmy Award nomination. More recently, Bacon portrayed the title character, and was the series lead, of the Amazon Prime streaming television series I Love Dick, for which he was nominated for a Golden Globe Award.
+ |
+|  2 | /wiki/Kevin_Bacon_(disambiguation) | 2021-07-07 09:48:51 | Kevin Bacon (born 1958) is an American film and theater actor and musician.
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+|  3 | /wiki/Kevin_Bacon_(producer)       | 2021-07-07 09:48:53 | Kevin John Bacon[1] (born 30 March 1959 in Rotherham, Yorkshire, England) is an English musician and record producer best known for his work with fellow Brit Jonathan Quarmby under the moniker Bacon & Quarmby, as well as his tenure as bassist for the band the Comsat Angels.[2] After leaving the Comsat Angels, Kevin Bacon produced for many other artists, notably Finley Quaye, Longpigs and Ziggy Marley.[2]
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+|  4 | /wiki/Rotherham                    | 2021-07-07 09:48:55 | Rotherham (/?r?ð?r?m/ (listen))[1] is a large minster town in South Yorkshire, England. It is the main settlement in the Metropolitan Borough of Rotherham. Located on the traditional road between Sheffield and Doncaster. The Rother (Rotherham's namesake) merges with the River Don. The Don then flows through the town centre.
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
++----+------------------------------------+---------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+4 rows in set (0.02 sec)
+
 ■■■■■■■■■■■■■0707 수업中 새로 알게된것■■■■■■■■■■■■■
+
+=============================================================
+=============================================================
+=============================================================
+
 ■■■■■■■■■■■■■0708 수업中 새로 알게된것■■■■■■■■■■■■■
 ■■■■■■■■■■■■■0709 수업中 새로 알게된것■■■■■■■■■■■■■
