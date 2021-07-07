@@ -2445,14 +2445,16 @@ cur.execute('USE wikipedia')
 def insertPageIfNotExists(url):
     cur.execute('SELECT * FROM pages WHERE url = %s', (url)) # pages 테이블에서 해당 url을 가진 모든 row 가져옴
     if cur.rowcount == 0: # 하나도 없으면
+    
         #### 추가 / 수정된 부분 ####
         html = urlopen('http://en.wikipedia.org{}'.format(url))
         bs = BeautifulSoup(html, 'html.parser')
-        content = bs.find('div', {'class': 'mw-parser-output'}).find('p', {'class': None}).get_text()
+        content = bs.find('div', {'class': 'mw-parser-output'}).find('p', {'class': None})
         if content==None:
-            content = bs.find('h1').get_text()
-        cur.execute('INSERT INTO pages (url, content) VALUES (%s, %s)', (url, content)) # pages 테이블에 해당 url, content을 가진 새로운 row 추가
+            content = bs.find('h1')
+        cur.execute('INSERT INTO pages (url, content) VALUES (%s, %s)', (url, content.get_text())) # pages 테이블에 해당 url, content을 가진 새로운 row 추가
         ###########################
+        
         conn.commit() 
         test = cur.lastrowid
         print('lastrowid:', test) 
@@ -2461,6 +2463,19 @@ def insertPageIfNotExists(url):
         test1 = cur.fetchone()[0]
         print('fetchone()[0]:', test1) 
         return test1 
+'''
+[ 내가 쓴 방법 ]
+content = bs.find('div', {'class': 'mw-parser-output'}).find('p', {'class': None})
+if content==None:
+    content = bs.find('h1')
+
+[ 선생님 방법 ]
+try:
+    content = bs.find('div', {'class': 'mw-parser-output'}).find('p', {'class': None})
+except:
+    content = bs.find('h1')
+
+'''
 def loadPages():
     cur.execute('SELECT * FROM pages')
     pages = [row[1] for row in cur.fetchall()] # pages에 담긴 모든 row에 대해 url 가져와서 리스트에 담음
