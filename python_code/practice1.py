@@ -14,9 +14,9 @@ cur.execute('USE wikipedia')
 def insertPageIfNotExists(url):
     cur.execute('SELECT * FROM pages WHERE url = %s', (url)) # pages 테이블에서 해당 url을 가진 모든 row 가져옴
     if cur.rowcount == 0: # 하나도 없으면
+        #### 추가 / 수정된 부분 ####
         html = urlopen('http://en.wikipedia.org{}'.format(url))
         bs = BeautifulSoup(html, 'html.parser')
-        #### 추가 / 수정된 부분 ####
         content = bs.find('div', {'class': 'mw-parser-output'}).find('p', {'class': None}).get_text()
         if content==None:
             content = bs.find('h1').get_text()
