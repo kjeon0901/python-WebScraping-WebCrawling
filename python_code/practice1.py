@@ -16,7 +16,7 @@ def insertPageIfNotExists(url):
     if cur.rowcount == 0: # 하나도 없으면 (DB가 파이썬 변수 rowcount에 0을 담아줌)
         html = urlopen('http://en.wikipedia.org{}'.format(url))
         bs = BeautifulSoup(html, 'html.parser')
-        content = bs.find('div', {'class': 'mw-parser-output'}).find('p', {'class': None})
+        content = bs.find('div', {'class': 'mw-parser-output'}).find('p', {'class': None}).get_text()
         if content==None:
             content = bs.find('h1').get_text()
         cur.execute('INSERT INTO pages (url, content) VALUES (%s, %s)', (url, content)) # pages 테이블에 해당 url을 가진 새로운 추가
