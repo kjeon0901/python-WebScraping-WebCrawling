@@ -4,6 +4,8 @@ import re
 import pymysql # 파이썬과 DB를 연결시켜주는 패키지
 from random import shuffle
 
+# quiz 1. pages 테이블 안에 해당 페이지의 본문 or 제목(본문이 없는 경우)을 담은 content라는 컬럼 추가
+
 conn = pymysql.connect(host='127.0.0.1',
                        user='root', passwd='KJEON0901Q1W2E3R4', db='mysql', charset='utf8')
 cur = conn.cursor() # sql문을 실행시키고 결과를 얻어올 때 사용할 커서(cursor) 만듦
@@ -12,9 +14,13 @@ cur.execute('USE wikipedia') # sql문을 실행(execute), execute : 파이썬에
 def insertPageIfNotExists(url):
     cur.execute('SELECT * FROM pages WHERE url = %s', (url)) # pages 테이블에서 해당 url을 가진 모든 row 가져옴
     if cur.rowcount == 0: # 하나도 없으면 (DB가 파이썬 변수 rowcount에 0을 담아줌)
-        cur.execute('INSERT INTO pages (url) VALUES (%s)', (url)) # pages 테이블에 해당 url을 가진 새로운 추가
+        html = urlopen('http://en.wikipedia.org{}'.format(url))
+        bs = BeautifulSoup(html, 'html.parser')
+        content = bs.find('div', {'class': 'mw-parser-output'}).find('p', {'class': None})
+        if content==None:
+            content = bs.find('h1').get_text()
+        cur.execute('INSERT INTO pages (url, content) VALUES (%s, %s)', (url, content)) # pages 테이블에 해당 url을 가진 새로운 추가
         conn.commit() # 실제로 데이터베이스에 써줌
-        
         test = cur.lastrowid
         print('lastrowid:', test) # 새로운 페이지에 들어올 때마다 실행되므로 1씩 증가되며 출력
         return test # db_cursor를 이용해 excute한 테이블의 마지막 row id 값을 가져옴 => 지금 if문 안에서는 무조건 0이 리턴됨
