@@ -3,8 +3,10 @@ from bs4 import BeautifulSoup
 import re
 import pymysql # 파이썬과 DB를 연결시켜주는 패키지
 from random import shuffle
+import csv
 
 # quiz 1. pages 테이블 안에 해당 페이지의 본문 or 제목(본문이 없는 경우)을 담은 content라는 컬럼 추가
+# quiz 2. url 정보를 csv 파일에도 (mysql과 동시에) 저장하기
 
 conn = pymysql.connect(host='127.0.0.1',
                        user='root', passwd='KJEON0901Q1W2E3R4', db='mysql', charset='utf8')
@@ -14,7 +16,7 @@ cur.execute('USE wikipedia')
 def insertPageIfNotExists(url):
     cur.execute('SELECT * FROM pages WHERE url = %s', (url)) # pages 테이블에서 해당 url을 가진 모든 row 가져옴
     if cur.rowcount == 0: # 하나도 없으면
-    
+        
         #### 추가 / 수정된 부분 ####
         html = urlopen('http://en.wikipedia.org{}'.format(url))
         bs = BeautifulSoup(html, 'html.parser')
@@ -22,6 +24,13 @@ def insertPageIfNotExists(url):
         if content==None:
             content = bs.find('h1')
         cur.execute('INSERT INTO pages (url, content) VALUES (%s, %s)', (url, content.get_text())) # pages 테이블에 해당 url, content을 가진 새로운 row 추가
+        
+        csvFile = open('pages_url.csv', 'w+')
+        writer = csv.writer(csvFile)
+        try:
+            writer.writerow((url))
+        finally:
+            csvFile.close()
         ###########################
         
         conn.commit() 
@@ -32,19 +41,6 @@ def insertPageIfNotExists(url):
         test1 = cur.fetchone()[0]
         print('fetchone()[0]:', test1) 
         return test1 
-'''
-[ 내가 쓴 방법 ]
-content = bs.find('div', {'class': 'mw-parser-output'}).find('p', {'class': None})
-if content==None:
-    content = bs.find('h1')
-
-[ 선생님 방법 ]
-try:
-    content = bs.find('div', {'class': 'mw-parser-output'}).find('p', {'class': None})
-except:
-    content = bs.find('h1')
-
-'''
 def loadPages():
     cur.execute('SELECT * FROM pages')
     pages = [row[1] for row in cur.fetchall()] # pages에 담긴 모든 row에 대해 url 가져와서 리스트에 담음
