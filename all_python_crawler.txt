@@ -2549,7 +2549,7 @@ fetchone()[0]: 10
 
 #### quiz 2 ####
 final_urls = loadPages() # 프로그램 다시 실행하면 MySQL pages 테이블에 다음 row 10개 추가되는 것처럼, 얘도 다음 url 10개 추가됨. MySQL과 CSV에 같은 데이터가 저장됨. 
-csvFile = open('pages_url.csv', 'w+', encoding='utf-8')
+csvFile = open('pages_url.csv', 'a+', encoding='utf-8')
 writer = csv.writer(csvFile)
 try:
     writer.writerow(['URL'])
