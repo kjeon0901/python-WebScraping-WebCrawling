@@ -7,7 +7,7 @@ import csv
 
 
 conn = pymysql.connect(host='127.0.0.1',
-                       user='root', passwd='KJEON0901Q1W2E3R4', db='mysql', charset='utf8')
+                       user='root', passwd='!!!!!!!!', db='mysql', charset='utf8')
 cur = conn.cursor()
 cur.execute('USE wikipedia')
 
