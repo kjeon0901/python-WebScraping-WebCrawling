@@ -1051,9 +1051,6 @@ getLinks('/wiki/Kevin_Bacon')
 
 ■■■■■■■■■■■■■0623 수업中 새로 알게된것■■■■■■■■■■■■■
 
-뷰티풀솝 : 파싱 - 기본으로 사용
-	from bs4 import BeautifulSoup
-	bs = BeautifulSoup(html.text)
 셀레니움 : 클릭(웹페이지 넘어갈 때 多), 타이핑, 마우스 움직이기 등 - 최대한 지양, 필요할 때 사용
 	> 중간에 웹페이지 하나를 끼고 하는 것이라 속도가 느림. 
 	> BUT, 웹페이지 넘어가는 href에 링크 대신 자바스크립트 코드가 있거나 하면, 셀레니움 꼭 필요!!
@@ -1061,6 +1058,9 @@ getLinks('/wiki/Kevin_Bacon')
 	from selenium import webdriver
 	driver = webdriver.Chrome('~~~/chromedriver_win32/chromedriver.exe')
 	driver.get(url)
+뷰티풀솝 : 파싱 - 기본으로 사용
+	from bs4 import BeautifulSoup
+	bs = BeautifulSoup(html.text)
 requests : 셀레니움과 무관. 
 	from bs4 import BeautifulSoup
 	import requests
@@ -1084,6 +1084,7 @@ urlopen : 셀레니움과 무관.
   driver.find_element_by_class( ) 	: class로 태그 찾기
   driver.find_element_by_tag_name( )	: tag name으로 태그 찾기
   driver.find_element_by_xpath( )	: Copy Full XPath로 태그 찾기
+  driver.find_element_by_link_text( )	: link(a태그)가 갖고 있는 text로 태그 찾기
   ㆍㆍㆍ
 - select( ) 속성값 ex_<div id='id' class='class' anyother='anyother'>
 	1. select(div#id)
