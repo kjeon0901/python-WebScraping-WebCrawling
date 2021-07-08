@@ -2349,40 +2349,40 @@ conn.close()
 이제 mysql로 확인해보면!
 
 mysql> SELECT * FROM pages;
-+----+----------------------------------------------+---------------------+
-| id | url                                          | created             |
-+----+----------------------------------------------+---------------------+
-|  1 | /wiki/Kevin_Bacon                            | 2021-07-06 11:22:11 |
-|  2 | /wiki/Kevin_Bacon_(disambiguation)           | 2021-07-06 11:22:12 |
-|  3 | /wiki/Kevin_Bacon_(producer)                 | 2021-07-06 11:22:13 |
-|  4 | /wiki/Rotherham                              | 2021-07-06 11:22:13 |
-|  5 | /wiki/Rotherham_(disambiguation)             | 2021-07-06 11:22:15 |
-|  6 | /wiki/Rotherham_(UK_Parliament_constituency) | 2021-07-06 11:22:15 |
-|  7 | /wiki/Metropolitan_Borough_of_Rotherham      | 2021-07-06 11:22:15 |
-|  8 | /wiki/Rotherham,_New_Zealand                 | 2021-07-06 11:22:16 |
-|  9 | /wiki/Alan_Rotherham                         | 2021-07-06 11:22:16 |
-| 10 | /wiki/Arthur_Rotherham                       | 2021-07-06 11:22:16 |
-| 11 | /wiki/Gerard_Rotherham                       | 2021-07-06 11:22:16 |
-+----+----------------------------------------------+---------------------+
++----+--------------------------------------------------+-----------------------+
+| id   | url                                                       | created                  |
++----+--------------------------------------------------+-----------------------+
+|  1   | /wiki/Kevin_Bacon                           	       | 2021-07-06 11:22:11 |
+|  2   | /wiki/Kevin_Bacon_(disambiguation)               | 2021-07-06 11:22:12 |
+|  3   | /wiki/Kevin_Bacon_(producer)                       | 2021-07-06 11:22:13 |
+|  4   | /wiki/Rotherham                                       | 2021-07-06 11:22:13 |
+|  5   | /wiki/Rotherham_(disambiguation)                 | 2021-07-06 11:22:15 |
+|  6   | /wiki/Rotherham_(UK_Parliament_constituency)  | 2021-07-06 11:22:15 |
+|  7   | /wiki/Metropolitan_Borough_of_Rotherham      | 2021-07-06 11:22:15 |
+|  8   | /wiki/Rotherham,_New_Zealand                     | 2021-07-06 11:22:16 |
+|  9   | /wiki/Alan_Rotherham                                | 2021-07-06 11:22:16 |
+| 10  | /wiki/Arthur_Rotherham                              | 2021-07-06 11:22:16 |
+| 11  | /wiki/Gerard_Rotherham                             | 2021-07-06 11:22:16 |
++----+--------------------------------------------------+-----------------------+
 11 rows in set (0.00 sec)
 
 
 mysql> SELECT * FROM links;
-+----+------------+----------+---------------------+
-| id | fromPageId | toPageId | created             |
-+----+------------+----------+---------------------+
-|  1 |          1 |        2 | 2021-07-06 11:22:12 |
-|  2 |          2 |        1 | 2021-07-06 11:22:12 |
-|  3 |          2 |        3 | 2021-07-06 11:22:13 |
-|  4 |          3 |        4 | 2021-07-06 11:22:13 |
-|  5 |          4 |        5 | 2021-07-06 11:22:15 |
-|  6 |          5 |        4 | 2021-07-06 11:22:15 |
-|  7 |          5 |        6 | 2021-07-06 11:22:15 |
-|  8 |          5 |        7 | 2021-07-06 11:22:16 |
-|  9 |          5 |        8 | 2021-07-06 11:22:16 |
-| 10 |          5 |        9 | 2021-07-06 11:22:16 |
-| 11 |          5 |       10 | 2021-07-06 11:22:16 |
-+----+------------+----------+---------------------+
++----+-------------+----------+-----------------------+
+| id   | fromPageId | toPageId | created                 |
++----+-------------+----------+-----------------------+
+|  1   |              1 |          2 | 2021-07-06 11:22:12 |
+|  2   |              2 |          1 | 2021-07-06 11:22:12 |
+|  3   |              2 |          3 | 2021-07-06 11:22:13 |
+|  4   |              3 |          4 | 2021-07-06 11:22:13 |
+|  5   |              4 |          5 | 2021-07-06 11:22:15 |
+|  6   |              5 |          4 | 2021-07-06 11:22:15 |
+|  7   |              5 |          6 | 2021-07-06 11:22:15 |
+|  8   |              5 |          7 | 2021-07-06 11:22:16 |
+|  9   |              5 |          8 | 2021-07-06 11:22:16 |
+| 10  |              5 |          9 | 2021-07-06 11:22:16 |
+| 11  |              5 |         10 | 2021-07-06 11:22:16 |
++----+-------------+----------+-----------------------+
 11 rows in set (0.00 sec)
 
 ■■■■■■■■■■■■■0707 수업中 새로 알게된것■■■■■■■■■■■■■
@@ -2398,14 +2398,14 @@ Records: 0  Duplicates: 0  Warnings: 0
 
 mysql> DESC pages;					// 실수로 Null 값을 YES 로 해버렸다! 해결하자.
 						// 만약 Null 이 YES 인데 auto_increment 또는 timestamp 가 아니라면, Null값이 잘못 들어오더라도 그냥 계속 실행됨.  
-+---------+--------------+------+-----+-------------------+-------------------+
-| Field   | Type         | Null | Key | Default           | Extra             |
-+---------+--------------+------+-----+-------------------+-------------------+
-| id      | int          | NO   | PRI | NULL              | auto_increment    |
-| url     | varchar(255) | NO   |     | NULL              |                   |
-| created | timestamp    | NO   |     | CURRENT_TIMESTAMP | DEFAULT_GENERATED |
-| content | text         | YES  |     | NULL              |                   |
-+---------+--------------+------+-----+-------------------+-------------------+
++---------+--------------+------+-----+------------------------+------------------------+
+| Field     | Type           | Null  | Key  | Default                   | Extra                       |
++---------+--------------+------+-----+------------------------+------------------------+
+| id         | int             | NO   | PRI  | NULL                      | auto_increment         |
+| url        | varchar(255) | NO   |       | NULL                      |                             |
+| created  | timestamp   | NO   |       | CURRENT_TIMESTAMP | DEFAULT_GENERATED |
+| content  | text           | YES   |       | NULL                      |                             |
++---------+--------------+------+-----+------------------------+------------------------+
 4 rows in set (0.00 sec)
 
 
@@ -2416,14 +2416,14 @@ Records: 0  Duplicates: 0  Warnings: 0
 
 
 mysql> DESC pages;
-+---------+--------------+------+-----+-------------------+-------------------+
-| Field   | Type         | Null | Key | Default           | Extra             |
-+---------+--------------+------+-----+-------------------+-------------------+
-| id      | int          | NO   | PRI | NULL              | auto_increment    |
-| url     | varchar(255) | NO   |     | NULL              |                   |
-| created | timestamp    | NO   |     | CURRENT_TIMESTAMP | DEFAULT_GENERATED |
-| content | text         | NO   |     | NULL              |                   |
-+---------+--------------+------+-----+-------------------+-------------------+
++---------+--------------+------+-----+------------------------+------------------------+
+| Field     | Type           | Null  | Key  | Default                   | Extra                      |
++---------+--------------+------+-----+------------------------+------------------------+
+| id         | int             | NO   | PRI  | NULL                      | auto_increment         |
+| url        | varchar(255)  | NO   |      | NULL                      |                             |
+| created  | timestamp    | NO   |      | CURRENT_TIMESTAMP | DEFAULT_GENERATED |
+| content  | text            | NO   |      | NULL                      |                             |
++---------+--------------+------+-----+------------------------+------------------------+
 4 rows in set (0.04 sec)
 
 
@@ -2549,10 +2549,9 @@ fetchone()[0]: 10
 
 #### quiz 2 ####
 final_urls = loadPages() # 프로그램 다시 실행하면 MySQL pages 테이블에 다음 row 10개 추가되는 것처럼, 얘도 다음 url 10개 추가됨. MySQL과 CSV에 같은 데이터가 저장됨. 
-csvFile = open('pages_url.csv', 'a+', encoding='utf-8')
+csvFile = open('pages_url.csv', 'w+', encoding='utf-8')
 writer = csv.writer(csvFile)
 try:
-    writer.writerow(['URL'])
     for url in final_urls:
         writer.writerow([url])
 finally:
