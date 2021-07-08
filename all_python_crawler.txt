@@ -1054,8 +1054,10 @@ getLinks('/wiki/Kevin_Bacon')
 뷰티풀솝 : 파싱 - 기본으로 사용
 	from bs4 import BeautifulSoup
 	bs = BeautifulSoup(html.text)
-셀레니움 : 클릭(웹페이지 넘어갈 때 多), 타이핑, 마우스 움직이기 등 - 필요할 때 사용
-	중간에 웹페이지 하나를 끼고 하는 것이라 속도가 느림. 최대한 지양. 
+셀레니움 : 클릭(웹페이지 넘어갈 때 多), 타이핑, 마우스 움직이기 등 - 최대한 지양, 필요할 때 사용
+	> 중간에 웹페이지 하나를 끼고 하는 것이라 속도가 느림. 
+	> BUT, 웹페이지 넘어가는 href에 링크 대신 자바스크립트 코드가 있거나 하면, 셀레니움 꼭 필요!!
+	   (일단 셀레니움으로 넘어가면 이제 셀레니움 쓰지 말고 뷰티풀솝 쓰기)
 	from selenium import webdriver
 	driver = webdriver.Chrome('~~~/chromedriver_win32/chromedriver.exe')
 	driver.get(url)
@@ -2440,7 +2442,7 @@ import csv # 파이썬과 csv를 연결시켜주는 패키지
 from random import shuffle
 
 # quiz 1. pages 테이블 안에 해당 페이지의 본문 or 제목(본문이 없는 경우)을 담은 content라는 컬럼 추가
-# quiz 2. url 정보를 csv 파일에도 (mysql과 동시에) 저장하기
+# quiz 2. url, content 정보를 csv 파일에도 (mysql과 동시에) 저장하기
 
 conn = pymysql.connect(host='127.0.0.1',
                        user='root', passwd='!!!!!!!!', db='mysql', charset='utf8')
@@ -2474,10 +2476,24 @@ def insertPageIfNotExists(url):
         print('fetchone()[0]:', test1) 
         return test1 
     
+'''
+아래에서 loadField_pages(field) 함수로 합침.
+
 def loadPages():
     cur.execute('SELECT * FROM pages')
     pages = [row[1] for row in cur.fetchall()] # pages에 담긴 모든 row에 대해 url 가져와서 리스트에 담음
     return pages
+
+def loadContents():
+    cur.execute('SELECT * FROM pages')
+    contents = [row[3] for row in cur.fetchall()] # pages에 담긴 모든 row에 대해 content 가져와서 리스트에 담음
+    return contents
+'''
+
+def loadField_pages(field):
+    cur.execute('SELECT * FROM pages')
+    load = [row[field] for row in cur.fetchall()] # pages에 담긴 모든 row에 대해 field값 가져와서 리스트에 담음
+    return load
 
 def insertLink(fromPageId, toPageId):
     cur.execute('SELECT * FROM links WHERE fromPageId = %s AND toPageId = %s', 
@@ -2513,8 +2529,10 @@ def getLinks(pageUrl, recursionLevel, pages):
             pages.append(link) 
             getLinks(link, recursionLevel+1, pages) 
         
-getLinks('/wiki/Kevin_Bacon', 0, loadPages()) # 처음엔 loadPages() : []
+getLinks('/wiki/Kevin_Bacon', 0, loadField_pages(1)) # 처음엔 loadField_pages(1) : []
 '''
+콘솔창 출력
+
 lastrowid: 1
 lastrowid: 2
 PAGE HAS NO LINKS: /wiki/Kevin_Bacon_(disambiguation)
@@ -2548,18 +2566,134 @@ fetchone()[0]: 10
 '''
 
 #### quiz 2 ####
-final_urls = loadPages() # 프로그램 다시 실행하면 MySQL pages 테이블에 다음 row 10개 추가되는 것처럼, 얘도 다음 url 10개 추가됨. MySQL과 CSV에 같은 데이터가 저장됨. 
-csvFile = open('pages_url.csv', 'w+', encoding='utf-8')
+final_urls = loadField_pages(1) # 프로그램 다시 실행하면 MySQL pages 테이블에 다음 row 10개 추가되는 것처럼, 얘네도 다음 url 10개 추가됨. MySQL과 CSV에 같은 데이터가 저장됨. 
+final_contents = loadField_pages(3)
+
+csvFile = open('pages_url_content.csv', 'w+', newline='', encoding='utf-8') # newline='' : writerow() 이후 자동 공백 추가되는 것 없앰
 writer = csv.writer(csvFile)
 try:
-    for url in final_urls:
-        writer.writerow([url])
+    for url, content in zip(final_urls, final_contents):
+        writer.writerow([url, content])
 finally:
     csvFile.close()
 ################
 
 cur.close()
 conn.close()
+
+'''
+==========  선생님 풀이  ===========
+
+from urllib.request import urlopen
+from bs4 import BeautifulSoup
+import re
+import pymysql
+from random import shuffle
+import csv
+
+
+conn = pymysql.connect(host='127.0.0.1',
+                       user='root', passwd='!!!!!!!!', db='mysql', charset='utf8')
+cur = conn.cursor()
+cur.execute('USE wikipedia')
+
+test33 = []
+def insertPageIfNotExists(url):
+    global test33
+    cur.execute('SELECT * FROM pages WHERE url = %s', (url))
+    
+    print("==================================================")
+    html = urlopen('http://en.wikipedia.org{}'.format(url))
+    bs = BeautifulSoup(html, 'html.parser')
+        
+    if cur.rowcount == 0:
+        print(url)
+       
+        temp = bs.find('div',{'class':'mw-parser-output'}).find('p',{'class':None}).get_text()
+        print(temp)
+        
+        csvFile = open('pages.csv', 'a', newline='', encoding='UTF-8')
+        writer = csv.writer(csvFile)
+        try:
+            writer.writerow([url, temp])
+        finally:
+            csvFile.close()   
+        
+        #ALTER TABLE pages ADD content TEXT;  새로운 field를 하나 추가하여야한다.
+        cur.execute('INSERT INTO pages (url,content) VALUES (%s, %s)', (url, temp))
+        #cur.execute('INSERT INTO pages (url) VALUES (%s)', (url))
+        conn.commit()
+        print('lastrow_id : ', cur.lastrowid)
+        return bs, cur.lastrowid
+    else:
+        test = cur.fetchone()[0]
+        print('fetch_Id :', test)
+        return bs, test
+
+def loadPages():
+    cur.execute('SELECT * FROM pages')
+    pages = [row for row in cur.fetchall()]
+    pages = list(pages)
+    
+    csvFile = open('pages.csv', 'wt+',  newline='', encoding='UTF-8')
+    writer = csv.writer(csvFile)
+    
+    try:
+        for row in pages:
+            #writerow에 인풋값으로 들어오는 element 단위로 각각의 셀에 저장 된다. 
+            #즉 바로 string이 들어오면 문자별로 셀에 저장된다
+            writer.writerow([row[1], row[3]]) 
+    finally:
+            csvFile.close()
+    
+    pages_url = []   
+    for row in pages:
+        pages_url.append(row[1])
+    
+    return pages_url
+
+def insertLink(fromPageId, toPageId):
+    cur.execute('SELECT * FROM links WHERE fromPageId = %s AND toPageId = %s', 
+                  (int(fromPageId), int(toPageId)))
+    if cur.rowcount != 0:
+        print('rowcount : {}, fromPageId:{}, toPageId:{} '.format(cur.rowcount, fromPageId , toPageId ))
+    if cur.rowcount == 0:
+        cur.execute('INSERT INTO links (fromPageId, toPageId) VALUES (%s, %s)', 
+                    (int(fromPageId), int(toPageId)))
+        conn.commit()
+def pageHasLinks(pageId):
+    cur.execute('SELECT * FROM links WHERE fromPageId = %s', (int(pageId)))
+    rowcount = cur.rowcount
+    if rowcount == 0:
+        return False
+    return True
+
+def getLinks(pageUrl, recursionLevel, pages):
+    #print('recursionLevel : {}'.format(recursionLevel))
+    if recursionLevel > 4:
+        return
+
+    bs, pageId = insertPageIfNotExists(pageUrl)
+    links = bs.findAll('a', href=re.compile('^(/wiki/)((?!:).)*$'))
+    links = [link.attrs['href'] for link in links]
+
+    for link in links:
+        bs, linkId = insertPageIfNotExists(link)
+        insertLink(pageId, linkId)
+        if not pageHasLinks(linkId):
+            #print("PAGE HAS NO LINKS: {}".format(link))
+            pages.append(link)
+            print('link : ', link)
+            getLinks(link, recursionLevel+1, pages)
+        else:
+            print('i,m here and fromPageId:{}, toPageId:{} '.format(linkId , pageId ))        
+
+
+loded_text = loadPages()
+getLinks('/wiki/Kevin_Bacon', 0, loded_text) 
+cur.close()
+conn.close()
+'''
 
 =============================================================
 
@@ -2579,4 +2713,10 @@ mysql> SELECT * FROM pages WHERE id < 5;
 4 rows in set (0.02 sec)
 
 ■■■■■■■■■■■■■0708 수업中 새로 알게된것■■■■■■■■■■■■■
+
+
+
+
+
+
 ■■■■■■■■■■■■■0709 수업中 새로 알게된것■■■■■■■■■■■■■

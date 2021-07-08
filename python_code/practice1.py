@@ -6,7 +6,7 @@ import csv # 파이썬과 csv를 연결시켜주는 패키지
 from random import shuffle
 
 # quiz 1. pages 테이블 안에 해당 페이지의 본문 or 제목(본문이 없는 경우)을 담은 content라는 컬럼 추가
-# quiz 2. url 정보를 csv 파일에도 (mysql과 동시에) 저장하기
+# quiz 2. url, content 정보를 csv 파일에도 (mysql과 동시에) 저장하기
 
 conn = pymysql.connect(host='127.0.0.1',
                        user='root', passwd='KJEON0901Q1W2E3R4', db='mysql', charset='utf8')
@@ -40,10 +40,24 @@ def insertPageIfNotExists(url):
         print('fetchone()[0]:', test1) 
         return test1 
     
+'''
+아래에서 loadField_pages(field) 함수로 합침.
+
 def loadPages():
     cur.execute('SELECT * FROM pages')
     pages = [row[1] for row in cur.fetchall()] # pages에 담긴 모든 row에 대해 url 가져와서 리스트에 담음
     return pages
+
+def loadContents():
+    cur.execute('SELECT * FROM pages')
+    contents = [row[3] for row in cur.fetchall()] # pages에 담긴 모든 row에 대해 content 가져와서 리스트에 담음
+    return contents
+'''
+
+def loadField_pages(field):
+    cur.execute('SELECT * FROM pages')
+    load = [row[field] for row in cur.fetchall()] # pages에 담긴 모든 row에 대해 field값 가져와서 리스트에 담음
+    return load
 
 def insertLink(fromPageId, toPageId):
     cur.execute('SELECT * FROM links WHERE fromPageId = %s AND toPageId = %s', 
@@ -79,8 +93,10 @@ def getLinks(pageUrl, recursionLevel, pages):
             pages.append(link) 
             getLinks(link, recursionLevel+1, pages) 
         
-getLinks('/wiki/Kevin_Bacon', 0, loadPages()) # 처음엔 loadPages() : []
+getLinks('/wiki/Kevin_Bacon', 0, loadField_pages(1)) # 처음엔 loadField_pages(1) : []
 '''
+콘솔창 출력
+
 lastrowid: 1
 lastrowid: 2
 PAGE HAS NO LINKS: /wiki/Kevin_Bacon_(disambiguation)
@@ -114,12 +130,14 @@ fetchone()[0]: 10
 '''
 
 #### quiz 2 ####
-final_urls = loadPages() # 프로그램 다시 실행하면 MySQL pages 테이블에 다음 row 10개 추가되는 것처럼, 얘도 다음 url 10개 추가됨. MySQL과 CSV에 같은 데이터가 저장됨. 
-csvFile = open('pages_url.csv', 'w+', encoding='utf-8')
+final_urls = loadField_pages(1) # 프로그램 다시 실행하면 MySQL pages 테이블에 다음 row 10개 추가되는 것처럼, 얘네도 다음 url 10개 추가됨. MySQL과 CSV에 같은 데이터가 저장됨. 
+final_contents = loadField_pages(3)
+
+csvFile = open('pages_url_content.csv', 'w+', newline='', encoding='utf-8') # newline='' : writerow() 이후 자동 공백 추가되는 것 없앰
 writer = csv.writer(csvFile)
 try:
-    for url in final_urls:
-        writer.writerow([url])
+    for url, content in zip(final_urls, final_contents):
+        writer.writerow([url, content])
 finally:
     csvFile.close()
 ################
