@@ -2,6 +2,7 @@ from urllib.request import urlopen
 from selenium import webdriver
 from selenium.webdriver.support.ui import Select # 추가 안해주면 webdriver.support.ui.Select 이렇게 접근해야 함. 
 from bs4 import BeautifulSoup
+import time
 
 url = "https://stat.kita.net/main.screen"
 driver = webdriver.Chrome('C:/Users/hs-702/Desktop/kjeon/chromedriver_win32/chromedriver.exe')
@@ -22,15 +23,26 @@ html = urlopen(url)
 bs = BeautifulSoup(html, 'html.parser')
 '''
 bs = BeautifulSoup(driver.page_source) 
-now = bs.find('div', {'id':'pageArea'}).find('strong', {'class':'selected'})
-now = bs.find('strong', class_='selected').get_text()
-#driver.find_element_by_link_text(now+1).click()
-#driver.find_element_by_xpath("/html/body/div[2]/div[2]/div[2]/div[2]/form/div[4]/div/span/strong/following-sibling").click()
+time.sleep(3)
+
 #driver.find_element_by_xpath("//li[@class='on']/following-sibling::li").click()
-print(driver.find_element_by_xpath("//strong[@class='selected']/following::a[1]"))
-'''
-try:
-    driver.find_element_by_xpath("//strong[@class='selected']/following-sibling::a").click()
-except:
-    driver.find_element_by_xpath("/html/body/div[2]/div[2]/div[2]/div[2]/form/div[4]/div/a[2]").click()
-'''
+var = '/html/body/div[2]/div[2]/div[2]/div[2]/form/div[4]/div/span/a[{}]'
+cnt = 0
+       
+
+while True:
+    while True:
+        cnt += 1
+        next_page = var.format(cnt%10)
+        try:
+            driver.find_element_by_xpath(next_page).click()
+            time.sleep(2)
+        except:
+            break
+    try:
+        driver.find_element_by_xpath('/html/body/div[2]/div[2]/div[2]/div[2]/form/div[4]/div/a[2]').click()
+        time.sleep(2)
+    except:
+        break
+    
+
