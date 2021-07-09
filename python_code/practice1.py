@@ -1,146 +1,74 @@
 from urllib.request import urlopen
 from bs4 import BeautifulSoup
 import re
-import pymysql # 파이썬과 DB를 연결시켜주는 패키지
-import csv # 파이썬과 csv를 연결시켜주는 패키지
-from random import shuffle
+from selenium import webdriver
+from selenium.webdriver.support.ui import Select
+import time
+import os, sys
+import shutil
 
-# quiz 1. pages 테이블 안에 해당 페이지의 본문 or 제목(본문이 없는 경우)을 담은 content라는 컬럼 추가
-# quiz 2. url, content 정보를 csv 파일에도 (mysql과 동시에) 저장하기
+url = ('https://stat.kita.net/main.screen')
 
-conn = pymysql.connect(host='127.0.0.1',
-                       user='root', passwd='KJEON0901Q1W2E3R4', db='mysql', charset='utf8')
-cur = conn.cursor() 
-cur.execute('USE wikipedia')
-cnt = 10
+defalt_next_page_tag_path = "/html/body/div[2]/div[2]/div[2]/div[2]/form/div[4]/div/span/"
 
-def insertPageIfNotExists(url):
-    global cnt
-    cur.execute('SELECT * FROM pages WHERE url = %s', (url)) # pages 테이블에서 해당 url을 가진 모든 row 가져옴
-    if cur.rowcount == 0: # 하나도 없으면
-        cnt = cnt-1
-        if cnt < 0:
-            return -1 # 10개의 url 저장되면 종료
+work_place_root_default_path = 'C:/Users/HS-802/Google Drive/sync folder all/회사업무 외 작업폴더'
+work_place_root_down_path = 'C:/Users/HS-802/Downloads'
+
+driver = webdriver.Chrome('C:/Users/hs-702/Desktop/kjeon/chromedriver_win32/chromedriver.exe')
+driver.get(url)
+
+#먼저 국내통계를 클릭해야 그 하위 카테고리가 생기고 그안에 우리가 들어가고자 목적하는 품목수출입 링크가 존재한다.
+driver.find_element_by_xpath("/html/body/div[2]/div[1]/div/div[2]/ul/li[1]/a/img").click()
+driver.find_element_by_link_text("품목 수출입").click()
+
+#100개씩 보기 선택 
+select = Select(driver.find_element_by_id('listCount'))
+select.select_by_value('100')
+
+#년월에서 1월 선택
+select = Select(driver.find_element_by_name('s_month'))
+select.select_by_value('01')
+
+#조회 클릭 하여서 100개씩 보기와 월정보 갱신 
+driver.find_element_by_xpath("/html/body/div[2]/div[2]/div[2]/div[2]/form/fieldset/div[3]").click()
+time.sleep(1)
+
+bs = BeautifulSoup(driver.page_source)
+
+page_link = bs.find('div', id='pageArea').find('span').find_all('a')
+page_link_count = len(page_link)
+
+
+'''def download(driver, bs): # 파일다운 + 이동 + 이름변경해서 폴더 안에 저장
         
-        #### quiz 1 ####
-        html = urlopen('http://en.wikipedia.org{}'.format(url))
-        bs = BeautifulSoup(html, 'html.parser')
-        content = bs.find('div', {'class': 'mw-parser-output'}).find('p', {'class': None})
-        if content==None:
-            content = bs.find('h1')
-        cur.execute('INSERT INTO pages (url, content) VALUES (%s, %s)', (url, content.get_text())) # pages 테이블에 해당 url, content을 가진 새로운 row 추가
-        ################
-        
-        conn.commit() 
-        test = cur.lastrowid
-        print('lastrowid:', test) 
-        return test 
-    else: # 있으면
-        test1 = cur.fetchone()[0]
-        print('fetchone()[0]:', test1) 
-        return test1 
+    shutil.move(path+'/K-stat 총괄 .xls', path+'/fileDir') # path + '/K-stat 총괄 .xls' 이 경로의 파일을 path+'/fileDir' 이 경로의 해당 폴더 안으로 이동시켜주세요
+    os.rename(path+'/fileDir/K-stat 총괄 .xls', path+'/fileDir/K-stat file_'+num+'.xls')
+  '''  
+def next_page_method(page_link_in_fnc_count_input):
+    link_list = []
     
-'''
-아래에서 loadField_pages(field) 함수로 합침.
-
-def loadPages():
-    cur.execute('SELECT * FROM pages')
-    pages = [row[1] for row in cur.fetchall()] # pages에 담긴 모든 row에 대해 url 가져와서 리스트에 담음
-    return pages
-
-def loadContents():
-    cur.execute('SELECT * FROM pages')
-    contents = [row[3] for row in cur.fetchall()] # pages에 담긴 모든 row에 대해 content 가져와서 리스트에 담음
-    return contents
-'''
-
-def loadField_pages(field):
-    cur.execute('SELECT * FROM pages')
-    load = [row[field] for row in cur.fetchall()] # pages에 담긴 모든 row에 대해 field값 가져와서 리스트에 담음
-    return load
-
-def insertLink(fromPageId, toPageId):
-    cur.execute('SELECT * FROM links WHERE fromPageId = %s AND toPageId = %s', 
-                  (int(fromPageId), int(toPageId))) 
-    if cur.rowcount == 0: # 하나도 없으면
-        cur.execute('INSERT INTO links (fromPageId, toPageId) VALUES (%s, %s)', 
-                    (int(fromPageId), int(toPageId)))
-        conn.commit()
-def pageHasLinks(pageId):
-    cur.execute('SELECT * FROM links WHERE fromPageId = %s', (int(pageId))) 
-    rowcount = cur.rowcount
-    if rowcount == 0: # 하나도 없으면
-        return False
-    return True # 하나라도 있으면
-
-def getLinks(pageUrl, recursionLevel, pages): 
-    pageId = insertPageIfNotExists(pageUrl) 
-    if recursionLevel > 4 or pageId == -1:
-        return
-    
-    html = urlopen('http://en.wikipedia.org{}'.format(pageUrl))
-    bs = BeautifulSoup(html, 'html.parser') 
-    links = bs.findAll('a', href=re.compile('^(/wiki/)((?!:).)*$'))
-    links = [link.attrs['href'] for link in links] 
-
-    for link in links: # link(href 속성값) 하나씩
-        linkId = insertPageIfNotExists(link) 
-        if linkId == -1:
-            return
-        insertLink(pageId, linkId) 
-        if not pageHasLinks(linkId): 
-            print("PAGE HAS NO LINKS: {}".format(link))
-            pages.append(link) 
-            getLinks(link, recursionLevel+1, pages) 
+    for row in range(1, page_link_in_fnc_count_input+1):
+        driver.find_element_by_xpath(defalt_next_page_tag_path + 'a['+str(row)+']' ).click()
+        time.sleep(1)
+        print(row)
+        bs = BeautifulSoup(driver.page_source)
+        download(driver, bs)
         
-getLinks('/wiki/Kevin_Bacon', 0, loadField_pages(1)) # 처음엔 loadField_pages(1) : []
-'''
-콘솔창 출력
+    last_page_num = driver.find_element_by_xpath(defalt_next_page_tag_path+'strong').text
+    driver.find_element_by_xpath("/html/body/div[2]/div[2]/div[2]/div[2]/form/div[4]/div/a[2]").click()
+    time.sleep(1)
+    
+    bs = BeautifulSoup(driver.page_source)
+    page_link_in_fnc_output = bs.find('div', id='pageArea').find('span').find_all('a')
+    page_link_in_fnc_output_count = len(page_link_in_fnc_output)
+    next_page_num = driver.find_element_by_xpath(defalt_next_page_tag_path + 'strong').text
 
-lastrowid: 1
-lastrowid: 2
-PAGE HAS NO LINKS: /wiki/Kevin_Bacon_(disambiguation)
-fetchone()[0]: 2
-fetchone()[0]: 1
-lastrowid: 3
-PAGE HAS NO LINKS: /wiki/Kevin_Bacon_(producer)
-fetchone()[0]: 3
-lastrowid: 4
-PAGE HAS NO LINKS: /wiki/Rotherham
-fetchone()[0]: 4
-lastrowid: 5
-PAGE HAS NO LINKS: /wiki/Rotherham_(disambiguation)
-fetchone()[0]: 5
-fetchone()[0]: 4
-lastrowid: 6
-PAGE HAS NO LINKS: /wiki/Rotherham_(UK_Parliament_constituency)
-fetchone()[0]: 6
-lastrowid: 7
-PAGE HAS NO LINKS: /wiki/Metropolitan_Borough_of_Rotherham
-fetchone()[0]: 7
-lastrowid: 8
-PAGE HAS NO LINKS: /wiki/Rotherham,_New_Zealand
-fetchone()[0]: 8
-lastrowid: 9
-PAGE HAS NO LINKS: /wiki/Alan_Rotherham
-fetchone()[0]: 9
-lastrowid: 10
-PAGE HAS NO LINKS: /wiki/Arthur_Rotherham
-fetchone()[0]: 10
-'''
+    return last_page_num, next_page_num, page_link_in_fnc_output_count
 
-#### quiz 2 ####
-final_urls = loadField_pages(1) # 프로그램 다시 실행하면 MySQL pages 테이블에 다음 row 10개 추가되는 것처럼, 얘네도 다음 url 10개 추가됨. MySQL과 CSV에 같은 데이터가 저장됨. 
-final_contents = loadField_pages(3)
+page_num_main= next_page_method(page_link_count)
+    
+while (page_num_main[0] != page_num_main[1] ):
+    print(page_num_main[0], page_num_main[1])
+    page_num_main = next_page_method(page_num_main[2])
 
-csvFile = open('pages_url_content.csv', 'w+', newline='', encoding='utf-8') # newline='' : writerow() 이후 자동 공백 추가되는 것 없앰
-writer = csv.writer(csvFile)
-try:
-    for url, content in zip(final_urls, final_contents):
-        writer.writerow([url, content])
-finally:
-    csvFile.close()
-################
 
-cur.close()
-conn.close()
