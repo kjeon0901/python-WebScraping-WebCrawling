@@ -2779,6 +2779,7 @@ while True:
         driver.find_element_by_xpath("/html/body/div[2]/div[2]/div[2]/div[2]/form/div[4]/div/a[2]").click()
         bs = BeautifulSoup(driver.page_source) 
         if bs.find('strong', {'class':'selected'}).get_text() == last_1stPage:
+            # 여기서 프로그램 종료 안 되고 에러나면서 끝남. 해결 필요!
             break
         else:
             last_1stPage = bs.find('strong', {'class':'selected'}).get_text()
