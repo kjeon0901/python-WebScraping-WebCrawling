@@ -24,7 +24,7 @@ driver.find_element_by_xpath("/html/body/div[2]/div[2]/div[2]/div[2]/form/fields
 time.sleep(1)
 
 # 페이지 1 ~ 53(마지막)까지 이동, 전체 데이터 전처리 후 다운받기(다운 일단 받고, 비어있는 데이터가 있으면 다시 다운받도록)
-# 데이터 옮
+# 데이터 옮기기
 
 '''
 def filedown(): # 파일다운 + 이동 + 이름변경해서 폴더 안에 저장
@@ -51,11 +51,11 @@ last_1stPage = bs.find('strong', {'class':'selected'}).get_text()
 
 num = bs.find('strong', {'class':'selected'}).get_text()
 print("num", num)
-#shutil.move('C:/Users/hs-702/Downloads'+'/K-stat 총괄 .xls', 'C:/Users/hs-702/Desktop/kjeon/python_code'+'/Kstat_FileDir') # path + '/K-stat 총괄 .xls' 이 경로의 파일을 path+'/fileDir' 이 경로의 해당 폴더 안으로 이동시켜주세요
-#os.rename('C:/Users/hs-702/Desktop/kjeon/python_code/Kstat_FileDir'+'/K-stat 총괄 .xls', 'C:/Users/hs-702/Desktop/kjeon/python_code/Kstat_FileDir'+'/K-stat file_'+num+'.xls')
-shutil.move('C:/Users/kjeon0901/Downloads'+'/K-stat 총괄 .xls', 'C:/Users/kjeon0901/Desktop/kjeon/python_code'+'/Kstat_FileDir') # path + '/K-stat 총괄 .xls' 이 경로의 파일을 path+'/fileDir' 이 경로의 해당 폴더 안으로 이동시켜주세요
-os.rename('C:/Users/kjeon0901/Desktop/kjeon/python_code/Kstat_FileDir'+'/K-stat 총괄 .xls', 'C:/Users/hs-702/Desktop/kjeon/python_code/Kstat_FileDir'+'/K-stat file_'+num+'.xls')
-
+#shutil.move('C:/Users/hs-702/Downloads'+'/K-stat 총괄 .xls', 'C:/Users/hs-702/Desktop/kjeon'+'/Kstat_FileDir') # path + '/K-stat 총괄 .xls' 이 경로의 파일을 path+'/fileDir' 이 경로의 해당 폴더 안으로 이동시켜주세요
+#os.rename('C:/Users/hs-702/Desktop/kjeon/Kstat_FileDir'+'/K-stat 총괄 .xls', 'C:/Users/hs-702/Desktop/kjeon/Kstat_FileDir'+'/K-stat file_'+num+'.xls')
+shutil.move('C:/Users/kjeon0901/Downloads'+'/K-stat 총괄 .xls', 'C:/Users/kjeon0901/Desktop/21proj/study/python-WebScraping-WebCrawling'+'/Kstat_FileDir') # path + '/K-stat 총괄 .xls' 이 경로의 파일을 path+'/fileDir' 이 경로의 해당 폴더 안으로 이동시켜주세요
+os.rename('C:/Users/kjeon0901/Desktop/21proj/study/python-WebScraping-WebCrawling/Kstat_FileDir'+'/K-stat 총괄 .xls', 'C:/Users/kjeon0901/Desktop/21proj/study/python-WebScraping-WebCrawling/Kstat_FileDir'+'/K-stat file_'+num+'.xls')
+C:\Users\kjeon0901\Desktop\21proj\study\python-WebScraping-WebCrawling
 while True:
     try:
         driver.find_element_by_xpath("//strong[@class='selected']/following-sibling::a[1]").click()
@@ -76,10 +76,10 @@ while True:
 
     num = bs.find('strong', {'class':'selected'}).get_text()
     print("num", num)
-    #shutil.move('C:/Users/hs-702/Downloads'+'/K-stat 총괄 .xls', 'C:/Users/hs-702/Desktop/kjeon/python_code'+'/Kstat_FileDir') # path + '/K-stat 총괄 .xls' 이 경로의 파일을 path+'/fileDir' 이 경로의 해당 폴더 안으로 이동시켜주세요
-    #os.rename('C:/Users/hs-702/Desktop/kjeon/python_code/Kstat_FileDir'+'/K-stat 총괄 .xls', 'C:/Users/hs-702/Desktop/kjeon/python_code/Kstat_FileDir'+'/K-stat file_'+num+'.xls')
-    shutil.move('C:/Users/hs-702/Downloads'+'/K-stat 총괄 .xls', 'C:/Users/hs-702/Desktop/kjeon/python_code'+'/Kstat_FileDir') # path + '/K-stat 총괄 .xls' 이 경로의 파일을 path+'/fileDir' 이 경로의 해당 폴더 안으로 이동시켜주세요
-    os.rename('C:/Users/hs-702/Desktop/kjeon/python_code/Kstat_FileDir'+'/K-stat 총괄 .xls', 'C:/Users/hs-702/Desktop/kjeon/python_code/Kstat_FileDir'+'/K-stat file_'+num+'.xls')
+    #shutil.move('C:/Users/hs-702/Downloads'+'/K-stat 총괄 .xls', 'C:/Users/hs-702/Desktop/kjeon'+'/Kstat_FileDir') # path + '/K-stat 총괄 .xls' 이 경로의 파일을 path+'/fileDir' 이 경로의 해당 폴더 안으로 이동시켜주세요
+    #os.rename('C:/Users/hs-702/Desktop/kjeon/Kstat_FileDir'+'/K-stat 총괄 .xls', 'C:/Users/hs-702/Desktop/kjeon/Kstat_FileDir'+'/K-stat file_'+num+'.xls')
+    shutil.move('C:/Users/kjeon0901/Downloads'+'/K-stat 총괄 .xls', 'C:/Users/kjeon0901/Desktop/21proj/study/python-WebScraping-WebCrawling'+'/Kstat_FileDir') # path + '/K-stat 총괄 .xls' 이 경로의 파일을 path+'/fileDir' 이 경로의 해당 폴더 안으로 이동시켜주세요
+    os.rename('C:/Users/kjeon0901/Desktop/21proj/study/python-WebScraping-WebCrawling/Kstat_FileDir'+'/K-stat 총괄 .xls', 'C:/Users/kjeon0901/Desktop/21proj/study/python-WebScraping-WebCrawling/Kstat_FileDir'+'/K-stat file_'+num+'.xls')
 
     
 
