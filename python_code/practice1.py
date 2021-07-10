@@ -47,12 +47,13 @@ page_link_count = len(page_link)
 def next_page_method(page_link_in_fnc_count_input):
     link_list = []
     
+    #download(driver, bs)
     for row in range(1, page_link_in_fnc_count_input+1):
         driver.find_element_by_xpath(defalt_next_page_tag_path + 'a['+str(row)+']' ).click()
         time.sleep(1)
         print(row)
         bs = BeautifulSoup(driver.page_source)
-        download(driver, bs)
+        #download(driver, bs)
         
     last_page_num = driver.find_element_by_xpath(defalt_next_page_tag_path+'strong').text
     driver.find_element_by_xpath("/html/body/div[2]/div[2]/div[2]/div[2]/form/div[4]/div/a[2]").click()

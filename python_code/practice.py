@@ -9,7 +9,8 @@ import csv
 import pandas as pd
 
 url = "https://stat.kita.net/main.screen"
-driver = webdriver.Chrome('C:/Users/hs-702/Desktop/kjeon/chromedriver_win32/chromedriver.exe')
+#driver = webdriver.Chrome('C:/Users/hs-702/Desktop/kjeon/chromedriver_win32/chromedriver.exe')
+driver = webdriver.Chrome('C:/Users/kjeon0901/Desktop/21proj/study/python-WebScraping-WebCrawling/chromedriver_win32/chromedriver.exe')
 driver.get(url)
 
 driver.find_element_by_xpath("/html/body/div[2]/div[1]/div/div[2]/ul/li[1]/a").click()
@@ -50,8 +51,10 @@ last_1stPage = bs.find('strong', {'class':'selected'}).get_text()
 
 num = bs.find('strong', {'class':'selected'}).get_text()
 print("num", num)
-shutil.move('C:/Users/hs-702/Downloads'+'/K-stat 총괄 .xls', 'C:/Users/hs-702/Desktop/kjeon/python_code'+'/Kstat_FileDir') # path + '/K-stat 총괄 .xls' 이 경로의 파일을 path+'/fileDir' 이 경로의 해당 폴더 안으로 이동시켜주세요
-os.rename('C:/Users/hs-702/Desktop/kjeon/python_code/Kstat_FileDir'+'/K-stat 총괄 .xls', 'C:/Users/hs-702/Desktop/kjeon/python_code/Kstat_FileDir'+'/K-stat file_'+num+'.xls')
+#shutil.move('C:/Users/hs-702/Downloads'+'/K-stat 총괄 .xls', 'C:/Users/hs-702/Desktop/kjeon/python_code'+'/Kstat_FileDir') # path + '/K-stat 총괄 .xls' 이 경로의 파일을 path+'/fileDir' 이 경로의 해당 폴더 안으로 이동시켜주세요
+#os.rename('C:/Users/hs-702/Desktop/kjeon/python_code/Kstat_FileDir'+'/K-stat 총괄 .xls', 'C:/Users/hs-702/Desktop/kjeon/python_code/Kstat_FileDir'+'/K-stat file_'+num+'.xls')
+shutil.move('C:/Users/kjeon0901/Downloads'+'/K-stat 총괄 .xls', 'C:/Users/kjeon0901/Desktop/kjeon/python_code'+'/Kstat_FileDir') # path + '/K-stat 총괄 .xls' 이 경로의 파일을 path+'/fileDir' 이 경로의 해당 폴더 안으로 이동시켜주세요
+os.rename('C:/Users/kjeon0901/Desktop/kjeon/python_code/Kstat_FileDir'+'/K-stat 총괄 .xls', 'C:/Users/hs-702/Desktop/kjeon/python_code/Kstat_FileDir'+'/K-stat file_'+num+'.xls')
 
 while True:
     try:
@@ -73,6 +76,8 @@ while True:
 
     num = bs.find('strong', {'class':'selected'}).get_text()
     print("num", num)
+    #shutil.move('C:/Users/hs-702/Downloads'+'/K-stat 총괄 .xls', 'C:/Users/hs-702/Desktop/kjeon/python_code'+'/Kstat_FileDir') # path + '/K-stat 총괄 .xls' 이 경로의 파일을 path+'/fileDir' 이 경로의 해당 폴더 안으로 이동시켜주세요
+    #os.rename('C:/Users/hs-702/Desktop/kjeon/python_code/Kstat_FileDir'+'/K-stat 총괄 .xls', 'C:/Users/hs-702/Desktop/kjeon/python_code/Kstat_FileDir'+'/K-stat file_'+num+'.xls')
     shutil.move('C:/Users/hs-702/Downloads'+'/K-stat 총괄 .xls', 'C:/Users/hs-702/Desktop/kjeon/python_code'+'/Kstat_FileDir') # path + '/K-stat 총괄 .xls' 이 경로의 파일을 path+'/fileDir' 이 경로의 해당 폴더 안으로 이동시켜주세요
     os.rename('C:/Users/hs-702/Desktop/kjeon/python_code/Kstat_FileDir'+'/K-stat 총괄 .xls', 'C:/Users/hs-702/Desktop/kjeon/python_code/Kstat_FileDir'+'/K-stat file_'+num+'.xls')
 
