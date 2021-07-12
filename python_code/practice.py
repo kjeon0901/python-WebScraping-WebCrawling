@@ -9,8 +9,8 @@ import csv
 import pandas as pd
 
 url = "https://stat.kita.net/main.screen"
-#driver = webdriver.Chrome('C:/Users/hs-702/Desktop/kjeon/chromedriver_win32/chromedriver.exe')
-driver = webdriver.Chrome('C:/Users/kjeon0901/Desktop/21proj/study/python-WebScraping-WebCrawling/chromedriver_win32/chromedriver.exe')
+driver = webdriver.Chrome('C:/Users/hs703/Desktop/kjeon/chromedriver_win32/chromedriver.exe')
+#driver = webdriver.Chrome('C:/Users/kjeon0901/Desktop/21proj/study/python-WebScraping-WebCrawling/chromedriver_win32/chromedriver.exe')
 driver.get(url)
 
 driver.find_element_by_xpath("/html/body/div[2]/div[1]/div/div[2]/ul/li[1]/a").click()
@@ -24,45 +24,52 @@ driver.find_element_by_xpath("/html/body/div[2]/div[2]/div[2]/div[2]/form/fields
 time.sleep(1)
 
 # 페이지 1 ~ 53(마지막)까지 이동, 전체 데이터 전처리 후 다운받기(다운 일단 받고, 비어있는 데이터가 있으면 다시 다운받도록)
-# 데이터 옮기기
+# 예외처리 1. 비어있는 데이터 다운받은 경우
+# 예외처리 2. 없는 데이터를 shutil.move()하려고 하는 경우
+# concat 로 폴더에 저장된 모든 excel 파일을 하나의 excel 파일로 취합. 
 
-'''
-def filedown(): # 파일다운 + 이동 + 이름변경해서 폴더 안에 저장
+for _ in range(5):
+    driver.find_element_by_xpath("/html/body/div[2]/div[2]/div[2]/div[2]/form/div[4]/div/a[2]").click()
+    time.sleep(5)
     bs = BeautifulSoup(driver.page_source) 
-    while True:
-        driver.find_element_by_xpath('/html/body/div[2]/div[2]/div[2]/div[2]/form/div[1]/div/a[1]').click()
-        time.sleep(1)
-    
-        data = pd.read_excel(io='C:/Users/hs-702/Downloads/K-stat 총괄 .xls') #이 경로의 파일을 열고 불러와 객체로 f에 담기 (더블클릭 따닥-!)
-        if data.isna().sum() == 0:
-            print('null값 없음')
-            break
-    num = bs.find('strong', {'class':'selected'}).get_text()
-    shutil.move('C:/Users/hs-702/Downloads'+'/K-stat 총괄 .xls', 'C:/Users/hs-702/Desktop/kjeon/python_code'+'/Kstat_FileDir') # path + '/K-stat 총괄 .xls' 이 경로의 파일을 path+'/fileDir' 이 경로의 해당 폴더 안으로 이동시켜주세요
-    os.rename('C:/Users/hs-702/Desktop/kjeon/python_code'+'/Kstat_FileDir/K-stat 총괄 .xls', 'C:/Users/hs-702/Desktop/kjeon/python_code'+'/Kstat_FileDir/K-stat file_'+num+'.xls')
-'''
+    last_1stPage = bs.find('strong', {'class':'selected'}).get_text()
+    print(last_1stPage)
 
 
-driver.find_element_by_xpath('/html/body/div[2]/div[2]/div[2]/div[2]/form/div[1]/div/a[1]').click()
-time.sleep(1)
 bs = BeautifulSoup(driver.page_source) 
-
 last_1stPage = bs.find('strong', {'class':'selected'}).get_text()
-
 num = bs.find('strong', {'class':'selected'}).get_text()
-print("num", num)
-#shutil.move('C:/Users/hs-702/Downloads'+'/K-stat 총괄 .xls', 'C:/Users/hs-702/Desktop/kjeon'+'/Kstat_FileDir') # path + '/K-stat 총괄 .xls' 이 경로의 파일을 path+'/fileDir' 이 경로의 해당 폴더 안으로 이동시켜주세요
-#os.rename('C:/Users/hs-702/Desktop/kjeon/Kstat_FileDir'+'/K-stat 총괄 .xls', 'C:/Users/hs-702/Desktop/kjeon/Kstat_FileDir'+'/K-stat file_'+num+'.xls')
-shutil.move('C:/Users/kjeon0901/Downloads'+'/K-stat 총괄 .xls', 'C:/Users/kjeon0901/Desktop/21proj/study/python-WebScraping-WebCrawling'+'/Kstat_FileDir') # path + '/K-stat 총괄 .xls' 이 경로의 파일을 path+'/fileDir' 이 경로의 해당 폴더 안으로 이동시켜주세요
-os.rename('C:/Users/kjeon0901/Desktop/21proj/study/python-WebScraping-WebCrawling/Kstat_FileDir'+'/K-stat 총괄 .xls', 'C:/Users/kjeon0901/Desktop/21proj/study/python-WebScraping-WebCrawling/Kstat_FileDir'+'/K-stat file_'+num+'.xls')
-C:\Users\kjeon0901\Desktop\21proj\study\python-WebScraping-WebCrawling
+while True:
+    driver.find_element_by_xpath('/html/body/div[2]/div[2]/div[2]/div[2]/form/div[1]/div/a[1]').click()
+    time.sleep(3)
+    data = pd.read_excel('C:/Users/hs703/Downloads/K-stat 총괄 .xls') #이 경로의 파일을 열고 불러와 객체로 f에 담기 (더블클릭 따닥-!)
+    if data.shape[0] >= 103 and data.shape[1] >= 13:
+        print('num', num, '성공')
+        break
+    print('num', num, '실패')
+    os.remove('C:/Users/hs703/Downloads/K-stat 총괄 .xls')
+while True:
+    try:
+        shutil.move('C:/Users/hs703/Downloads'+'/K-stat 총괄 .xls', 'C:/Users/hs703/Desktop/kjeon'+'/Kstat_FileDir') # path + '/K-stat 총괄 .xls' 이 경로의 파일을 path+'/fileDir' 이 경로의 해당 폴더 안으로 이동시켜주세요
+        #shutil.move('C:/Users/kjeon0901/Downloads'+'/K-stat 총괄 .xls', 'C:/Users/kjeon0901/Desktop/21proj/study/python-WebScraping-WebCrawling'+'/Kstat_FileDir') # path + '/K-stat 총괄 .xls' 이 경로의 파일을 path+'/fileDir' 이 경로의 해당 폴더 안으로 이동시켜주세요
+        break
+    except:
+        print('이동실패')
+        time.sleep(1)
+os.rename('C:/Users/hs703/Desktop/kjeon/Kstat_FileDir'+'/K-stat 총괄 .xls', 'C:/Users/hs703/Desktop/kjeon/Kstat_FileDir'+'/K-stat file_'+num+'.xls')
+#os.rename('C:/Users/kjeon0901/Desktop/21proj/study/python-WebScraping-WebCrawling/Kstat_FileDir'+'/K-stat 총괄 .xls', 'C:/Users/kjeon0901/Desktop/21proj/study/python-WebScraping-WebCrawling/Kstat_FileDir'+'/K-stat file_'+num+'.xls')
+
+temp = []
+temp.append(data)
+
 while True:
     try:
         driver.find_element_by_xpath("//strong[@class='selected']/following-sibling::a[1]").click()
     except:
         driver.find_element_by_xpath("/html/body/div[2]/div[2]/div[2]/div[2]/form/div[4]/div/a[2]").click()
+        time.sleep(5)
         bs = BeautifulSoup(driver.page_source) 
-        if bs.find('strong', {'class':'selected'}).get_text() == last_1stPage: 
+        if bs.find('strong', {'class':'selected'}).get_text() == '53':
             # 여기서 프로그램 종료 안 되고 에러나면서 끝남. 해결 필요!
             break
         else:
@@ -70,72 +77,65 @@ while True:
     time.sleep(5)
     
     # 파일다운 + 이동 + 이름변경해서 폴더 안에 저장
-    driver.find_element_by_xpath('/html/body/div[2]/div[2]/div[2]/div[2]/form/div[1]/div/a[1]').click()
-    time.sleep(1)
     bs = BeautifulSoup(driver.page_source) 
-
     num = bs.find('strong', {'class':'selected'}).get_text()
-    print("num", num)
-    #shutil.move('C:/Users/hs-702/Downloads'+'/K-stat 총괄 .xls', 'C:/Users/hs-702/Desktop/kjeon'+'/Kstat_FileDir') # path + '/K-stat 총괄 .xls' 이 경로의 파일을 path+'/fileDir' 이 경로의 해당 폴더 안으로 이동시켜주세요
-    #os.rename('C:/Users/hs-702/Desktop/kjeon/Kstat_FileDir'+'/K-stat 총괄 .xls', 'C:/Users/hs-702/Desktop/kjeon/Kstat_FileDir'+'/K-stat file_'+num+'.xls')
-    shutil.move('C:/Users/kjeon0901/Downloads'+'/K-stat 총괄 .xls', 'C:/Users/kjeon0901/Desktop/21proj/study/python-WebScraping-WebCrawling'+'/Kstat_FileDir') # path + '/K-stat 총괄 .xls' 이 경로의 파일을 path+'/fileDir' 이 경로의 해당 폴더 안으로 이동시켜주세요
-    os.rename('C:/Users/kjeon0901/Desktop/21proj/study/python-WebScraping-WebCrawling/Kstat_FileDir'+'/K-stat 총괄 .xls', 'C:/Users/kjeon0901/Desktop/21proj/study/python-WebScraping-WebCrawling/Kstat_FileDir'+'/K-stat file_'+num+'.xls')
+    while True:
+        driver.find_element_by_xpath('/html/body/div[2]/div[2]/div[2]/div[2]/form/div[1]/div/a[1]').click()
+        time.sleep(3)
+        data = pd.read_excel('C:/Users/hs703/Downloads/K-stat 총괄 .xls') #이 경로의 파일을 열고 불러와 객체로 f에 담기 (더블클릭 따닥-!)
+        if data.shape[0] >= 103 and data.shape[1] >= 13:
+            print('num', num, '성공')
+            break
+        elif bs.find('strong', {'class':'selected'}).get_text() == '53':
+            print('num', num, '성공')
+            break
+            
+        
+        print('num', num, '실패')
+        os.remove('C:/Users/hs703/Downloads/K-stat 총괄 .xls')
+    temp.append(data)
+    while True:
+        try:
+            shutil.move('C:/Users/hs703/Downloads'+'/K-stat 총괄 .xls', 'C:/Users/hs703/Desktop/kjeon'+'/Kstat_FileDir') # path + '/K-stat 총괄 .xls' 이 경로의 파일을 path+'/fileDir' 이 경로의 해당 폴더 안으로 이동시켜주세요
+            #shutil.move('C:/Users/kjeon0901/Downloads'+'/K-stat 총괄 .xls', 'C:/Users/kjeon0901/Desktop/21proj/study/python-WebScraping-WebCrawling'+'/Kstat_FileDir') # path + '/K-stat 총괄 .xls' 이 경로의 파일을 path+'/fileDir' 이 경로의 해당 폴더 안으로 이동시켜주세요
+            break
+        except:
+            print('이동실패')
+            time.sleep(1)
+    os.rename('C:/Users/hs703/Desktop/kjeon/Kstat_FileDir'+'/K-stat 총괄 .xls', 'C:/Users/hs703/Desktop/kjeon/Kstat_FileDir'+'/K-stat file_'+num+'.xls')
+    #os.rename('C:/Users/kjeon0901/Desktop/21proj/study/python-WebScraping-WebCrawling/Kstat_FileDir'+'/K-stat 총괄 .xls', 'C:/Users/kjeon0901/Desktop/21proj/study/python-WebScraping-WebCrawling/Kstat_FileDir'+'/K-stat file_'+num+'.xls')
 
     
 
-
-
-
-
-
-
-
-
 '''
-var = '/html/body/div[2]/div[2]/div[2]/div[2]/form/div[4]/div/span/a[{}]'
-cnt = 0
-while True:
-    cnt += 1
-    print(cnt)
-    if cnt % 10 == 0:
-        driver.find_element_by_xpath('/html/body/div[2]/div[2]/div[2]/div[2]/form/div[4]/div/a[2]').click()
-        time.sleep(2)
-        #download()
-        continue
-    next_page = var.format(cnt%10)
-    try:
-        driver.find_element_by_xpath(next_page).click()
-    except:
-        break
-    time.sleep(2)
+os.walk(path) : 하위의 폴더들을 for문으로 탐색. 인자로 전달된 path에 대해서 (root, dirs, files)를 담은 tuple을 넘겨줌
 
-
-while True:
-    while True:
-        cnt += 1
-        next_page = var.format(cnt%10)
-        try:
-            driver.find_element_by_xpath(next_page).click()
-            time.sleep(2)
-        except:
-            break
-    try:
-        driver.find_element_by_xpath('/html/body/div[2]/div[2]/div[2]/div[2]/form/div[4]/div/a[2]').click()
-        time.sleep(2)
-    except:
-        break
+root : dir과 files가 있는 path
+dirs : root 아래에 있는 폴더들
+files : root 아래에 있는 파일들
 '''
 
-'''
-#driver.find_element_by_xpath(var+str(now)+']').click()
-#now = bs.find('strong', class_='selected').get_text()
-#driver.find_element_by_link_text(now+1).click()
-#driver.find_element_by_xpath("/html/body/div[2]/div[2]/div[2]/div[2]/form/div[4]/div/span/strong").click()
-#/html/body/div[2]/div[2]/div[2]/div[2]/form/div[4]/div/span/strong
-#/html/body/div[2]/div[2]/div[2]/div[2]/form/div[4]/div/span/a[1]
+temp = os.walk('C:/Users/hs703/Desktop/kjeon/Kstat_FileDir')
+total = []
+for idx, row in enumerate(temp):
+    for row in row[2]: #모든 파일 각각
+        total.append(pd.read_excel('C:/Users/hs703/Desktop/kjeon/Kstat_FileDir/' + row))
 
-try:
-    driver.find_element_by_xpath("//strong[@class='selected']/following-sibling::a").click()
-except:
-    driver.find_element_by_xpath("/html/body/div[2]/div[2]/div[2]/div[2]/form/div[4]/div/a[2]").click()
-'''
+
+test1 = pd.concat([total[1], total[2]])
+test2 = total[1]
+test3 = test2.iloc[:, 1:]
+# 컬럼 이름 중복되면 안 됨. 
+test4 = test3.rename(columns = {'Unnamed: 1':'코드', 'Unnamed: 2':'품목명', 'Unnamed: 3': '2020년 수출금액'})
+
+
+
+
+
+
+
+
+
+
+
+
