@@ -115,18 +115,20 @@ dirs : root 아래에 있는 폴더들
 files : root 아래에 있는 파일들
 '''
 
-temp = os.walk('C:/Users/hs703/Desktop/kjeon/Kstat_FileDir')
+temp = os.walk('C:/Users/hs703/Desktop/kjeon/Kstat_FileDir') # for문을 돌리는 용도로 사용된 객체
 total = []
 for idx, row in enumerate(temp):
     for row in row[2]: #모든 파일 각각
         total.append(pd.read_excel('C:/Users/hs703/Desktop/kjeon/Kstat_FileDir/' + row))
+        # read_excel로 파일 불러올 때 header로 column name 정해줄 수 있음. 
 
 
-test1 = pd.concat([total[1], total[2]])
-test2 = total[1]
-test3 = test2.iloc[:, 1:]
+
 # 컬럼 이름 중복되면 안 됨. 
-test4 = test3.rename(columns = {'Unnamed: 1':'코드', 'Unnamed: 2':'품목명', 'Unnamed: 3': '2020년 수출금액'})
+df = pd.concat([each.iloc[:, 1:].drop(0) for each in total])
+changeTo = df.iloc[[0, 1]].apply(lambda x : x.iloc[1] if x.iloc[0] == x.iloc[1] else str(x.iloc[0])+str(x.iloc[1]))
+colname = dict(zip(list(df.columns), [each for each in changeTo]))
+df_ = df.rename(columns = colname).drop([1, 2]).reset_index().drop('index', axis=1)
 
 
 
